@@ -58,8 +58,6 @@ public class ChessPiece {
         ChessPiece piece = board.getPiece(myPosition);
         List<ChessMove> moves = new ArrayList<>();
 
-        //bishop: all four diagonals until hit 1 or 8
-        //up left: remove one from col and add one to row until either row = 1 or col = 8, repeat similar idea for the other 4 directions
         if (piece.getPieceType() == PieceType.BISHOP) {
 
             //up and left
@@ -136,6 +134,7 @@ public class ChessPiece {
         }
 
         if (piece.getPieceType() == PieceType.KING) {
+
             //do a while loop going through all 9 squares
             //each time on the loop if it's edge of board OR piece then pass accordingly to the next cycle
             for (int i = -1; i < 2; i++) {
@@ -152,6 +151,28 @@ public class ChessPiece {
                     if (board.getPiece(new ChessPosition(newRow, newCol)) != null && board.getPiece(new ChessPosition(newRow, newCol)).pieceColor == piece.pieceColor) {
                         continue;
                     }
+                    moves.add(new ChessMove(new ChessPosition(myPosition.getRow(), myPosition.getColumn()), new ChessPosition(newRow, newCol), null));
+                }
+            }
+        }
+
+        if (piece.getPieceType() == PieceType.KNIGHT) {
+            //i want it to move one by one and one by two for every combinnation of pos and neg values)
+            for (int i = -2; i < 3; i++) {
+                for (int j = -2; j < 3; j++) {
+                    int newRow = myPosition.getRow()+i;
+                    int newCol = myPosition.getColumn()+j;
+
+                    //avoid spaces we don't want to go to (illegal moves, off board)
+                    if (Math.abs(i) == Math.abs(j) || i == 0 || j == 0 || newRow < 1 || newRow > 8 || newCol < 1 || newCol > 8) {
+                        continue;
+                    }
+
+                    //for if there's a piece there
+                    if (board.getPiece(new ChessPosition(newRow, newCol)) != null && board.getPiece(new ChessPosition(newRow, newCol)).pieceColor == piece.pieceColor) {
+                        continue;
+                    }
+
                     moves.add(new ChessMove(new ChessPosition(myPosition.getRow(), myPosition.getColumn()), new ChessPosition(newRow, newCol), null));
                 }
             }
