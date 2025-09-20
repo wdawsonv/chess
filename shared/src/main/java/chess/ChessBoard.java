@@ -83,10 +83,7 @@ public class ChessBoard {
 
     @Override
     public String toString() {
-//        return String.format("[%s]\n", Arrays.deepToString(squares));
-        return "ChessBoard{" +
-                "squares=" + Arrays.toString(squares) +
-                '}';
+        return String.format("[%s]\n", Arrays.deepToString(squares));
     }
 
     @Override
