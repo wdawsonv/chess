@@ -56,12 +56,12 @@ public class ChessPiece {
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         ChessPiece piece = board.getPiece(myPosition);
+        List<ChessMove> moves = new ArrayList<>();
+
         //bishop: all four diagonals until hit 1 or 8
         //up left: remove one from col and add one to row until either row = 1 or col = 8, repeat similar idea for the other 4 directions
         if (piece.getPieceType() == PieceType.BISHOP) {
-            List<ChessMove> moves = new ArrayList<>();
 
-            //check for pieces- if friendly stop one before, if enemy then go over and stop
             //up and left
             int newRow = myPosition.getRow()+1;
             int newCol = myPosition.getColumn()-1;
@@ -133,10 +133,30 @@ public class ChessPiece {
                     newCol++;
                 }
             }
-
-        return moves;
         }
-        return List.of();
+
+        if (piece.getPieceType() == PieceType.KING) {
+            //do a while loop going through all 9 squares
+            //each time on the loop if it's edge of board OR piece then pass accordingly to the next cycle
+            for (int i = -1; i < 2; i++) {
+                for (int j = -1; j < 2; j++) {
+                    int newRow = myPosition.getRow() + i;
+                    int newCol = myPosition.getColumn() + j;
+
+                    //don't include current position or out of bounds positions
+                    if (i == 0 && j == 0 || newRow < 1 || newRow > 8 || newCol < 1 || newCol > 8) {
+                        continue;
+                    }
+
+                    //if there's a piece there, move forward accordingly
+                    if (board.getPiece(new ChessPosition(newRow, newCol)) != null && board.getPiece(new ChessPosition(newRow, newCol)).pieceColor == piece.pieceColor) {
+                        continue;
+                    }
+                    moves.add(new ChessMove(new ChessPosition(myPosition.getRow(), myPosition.getColumn()), new ChessPosition(newRow, newCol), null));
+                }
+            }
+        }
+        return moves;
     }
 
     @Override
