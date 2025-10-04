@@ -1,5 +1,6 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -115,7 +116,39 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        //go through all opponent's pieces
+        //if one of the valid moves for any of them is the black king's position then you're in check
+        ChessPosition kingPos = new ChessPosition(1, 1);
+        boolean isInCheck = false;
+        List<ChessMove> enemyMoves = new ArrayList<>();
+        for (int startingRow = 1; startingRow <= 8; startingRow++) {
+            for (int startingCol = 1; startingCol <= 8; startingCol++) {
+                ChessPosition currPos = new ChessPosition(startingRow, startingCol);
+
+                if (gameBoard.getPiece(currPos) == null) {
+                    continue;
+                }
+
+                ChessPiece currPiece = gameBoard.getPiece(currPos);
+                if (currPiece.getTeamColor() == teamColor) {
+                    if (currPiece.getPieceType() == ChessPiece.PieceType.KING) {
+                        kingPos = currPos;
+                    }
+                    continue;
+                }
+
+                enemyMoves.addAll(validMoves(currPos));
+            }
+        }
+        for (ChessMove validMove : enemyMoves) {
+            ChessPosition endPos = validMove.getEndPosition();
+            if (endPos.equals(kingPos)) {
+                isInCheck = true;
+            }
+        }
+        //go through all enemy moves, if any are kingPos return true, else return false
+        return isInCheck;
+
     }
 
     /**
