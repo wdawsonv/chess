@@ -10,9 +10,15 @@ import java.util.Collection;
  */
 public class ChessGame {
 
-    private ChessGame.TeamColor teamTurn = TeamColor.WHITE;
+    private ChessGame.TeamColor teamTurn;
+    private ChessBoard board;
+
     public ChessGame() {
 
+        teamTurn = TeamColor.WHITE;
+
+        board = new ChessBoard();
+        board.resetBoard();
     }
 
     /**
@@ -57,7 +63,44 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        //get piece, start, and end position
+        ChessPosition startPosition = move.getStartPosition();
+        ChessPosition endPosition = move.getEndPosition();
+        ChessPiece piece = board.getPiece(startPosition);
+
+        //make sure the move is valid
+        //if move is valid
+        //do moves
+        //if it aint
+        //tell the user invalid move
+        Collection<ChessMove> moves = validMoves(startPosition);
+
+        //check if the move is valid
+        boolean canMove = false;
+        for (ChessMove validMove : moves) {
+            if (validMove == move) {
+                canMove = true;
+            }
+        }
+
+        if (canMove) {
+            board.addPiece(endPosition, piece);
+
+//            ChessPosition
+//            piece.ChessPosition = new ChessPosition(endPosition)
+//            board.
+            //set a new piece where a new piece should go
+
+            //i've got a piece here are my coords
+            //the piece's coords are now set to somethign else
+
+            //remove the original piece
+        } else {
+            throw new InvalidMoveException();
+        }
+
+
+        //make the move
     }
 
     /**
