@@ -17,6 +17,12 @@ public class ChessGame {
     private ChessBoard gameBoard;
     private ChessBoard copyBoard;
     private boolean usingCopyBoard;
+    private boolean wKingMoved;
+    private boolean bKingMoved;
+    private boolean wLRookMoved;
+    private boolean wRRookMoved;
+    private boolean bLRookMoved;
+    private boolean bRRookMoved;
 
     public ChessGame() {
 
@@ -27,6 +33,14 @@ public class ChessGame {
 
         copyBoard = gameBoard.clone();
         usingCopyBoard = false;
+
+        wKingMoved = false;
+        bKingMoved = false;
+        wLRookMoved = false;
+        wRRookMoved = false;
+        bLRookMoved = false;
+        bRRookMoved = false;
+
     }
 
     /**
@@ -63,7 +77,7 @@ public class ChessGame {
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         ChessPiece piece = gameBoard.getPiece(startPosition);
         TeamColor color = piece.getTeamColor();
-
+        //if piece is king- check castling requirements (squares clear, king and thing haven't moved, not castling through check) then put the copyboard bakc
         Collection<ChessMove> allMoveList = piece.pieceMoves(gameBoard, startPosition);
         Collection<ChessMove> finalMoveList = new ArrayList<>();
         for (ChessMove move : allMoveList) {
@@ -84,6 +98,131 @@ public class ChessGame {
             }
             usingCopyBoard = false;
         }
+        //White king castle left
+        if (color==TeamColor.WHITE) {
+            if (startPosition.equals(new ChessPosition(1, 5))) {
+                if (!wKingMoved && !wLRookMoved) {
+                    //no pieces between them
+                    if (gameBoard.getPiece(new ChessPosition(1, 2)) == null && gameBoard.getPiece(new ChessPosition(1, 3)) == null && gameBoard.getPiece(new ChessPosition(1, 4)) == null) {
+                        //king isn't in check
+                        if (!isInCheck(color)) {
+                            //king isn't castling through check
+                            usingCopyBoard = true;
+                            copyBoard = gameBoard.clone();
+                            copyBoard.addPiece(new ChessPosition(1, 4), new ChessPiece(TeamColor.WHITE, ChessPiece.PieceType.KING));
+                            copyBoard.addPiece(new ChessPosition(1, 5), null);
+                            if (!isInCheck(color)) {
+                                copyBoard = gameBoard.clone();
+                                copyBoard.addPiece(new ChessPosition(1, 3), new ChessPiece(TeamColor.WHITE, ChessPiece.PieceType.KING));
+                                copyBoard.addPiece(new ChessPosition(1, 5), null);
+                                if (!isInCheck(color)) {
+                                    //make sure nothing is in 1, 2
+                                    usingCopyBoard = false;
+                                    if (gameBoard.getPiece(new ChessPosition(1, 2)) == null && gameBoard.getPiece(new ChessPosition(1, 3)) == null && gameBoard.getPiece(new ChessPosition(1, 4)) == null) {
+                                        //then we can castle==== add just the king move and if the king moves two then move the castle two as well
+                                        finalMoveList.add(new ChessMove(startPosition, new ChessPosition(1, 3), null));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            usingCopyBoard = false;
+            //White king castle right
+            if (startPosition.equals(new ChessPosition(1, 5))) {
+                if (!wKingMoved && !wRRookMoved) {
+                    //no pieces between them
+                    if (gameBoard.getPiece(new ChessPosition(1, 7)) == null && gameBoard.getPiece(new ChessPosition(1, 6)) == null) {
+                        //king isn't in check
+                        if (!isInCheck(color)) {
+                            //king isn't castling through check
+                            usingCopyBoard = true;
+                            copyBoard = gameBoard.clone();
+                            copyBoard.addPiece(new ChessPosition(1, 6), new ChessPiece(TeamColor.WHITE, ChessPiece.PieceType.KING));
+                            copyBoard.addPiece(new ChessPosition(1, 5), null);
+                            if (!isInCheck(color)) {
+                                copyBoard = gameBoard.clone();
+                                copyBoard.addPiece(new ChessPosition(1, 7), new ChessPiece(TeamColor.WHITE, ChessPiece.PieceType.KING));
+                                copyBoard.addPiece(new ChessPosition(1, 5), null);
+                                if (!isInCheck(color)) {
+                                    //make sure nothing is in 1, 2
+                                    usingCopyBoard = false;
+                                    if (gameBoard.getPiece(new ChessPosition(1, 6)) == null && gameBoard.getPiece(new ChessPosition(1, 7)) == null) {
+                                        //then we can castle==== add just the king move and if the king moves two then move the castle two as well
+                                        finalMoveList.add(new ChessMove(startPosition, new ChessPosition(1, 7), null));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            usingCopyBoard = false;
+        }
+
+        //Black king castle left
+        if (color==TeamColor.BLACK) {
+            if (startPosition.equals(new ChessPosition(8, 5))) {
+                if (!bKingMoved && !bLRookMoved) {
+                    //no pieces between them
+                    if (gameBoard.getPiece(new ChessPosition(8, 2)) == null && gameBoard.getPiece(new ChessPosition(8, 3)) == null && gameBoard.getPiece(new ChessPosition(8, 4)) == null) {
+                        //king isn't in check
+                        if (!isInCheck(color)) {
+                            //king isn't castling through check
+                            usingCopyBoard = true;
+                            copyBoard = gameBoard.clone();
+                            copyBoard.addPiece(new ChessPosition(8, 4), new ChessPiece(TeamColor.BLACK, ChessPiece.PieceType.KING));
+                            copyBoard.addPiece(new ChessPosition(8, 5), null);
+                            if (!isInCheck(color)) {
+                                copyBoard = gameBoard.clone();
+                                copyBoard.addPiece(new ChessPosition(8, 3), new ChessPiece(TeamColor.BLACK, ChessPiece.PieceType.KING));
+                                copyBoard.addPiece(new ChessPosition(8, 5), null);
+                                if (!isInCheck(color)) {
+                                    //make sure nothing is in 1, 2
+                                    usingCopyBoard = false;
+                                    if (gameBoard.getPiece(new ChessPosition(1, 2)) == null && gameBoard.getPiece(new ChessPosition(8, 3)) == null && gameBoard.getPiece(new ChessPosition(8, 4)) == null) {
+                                        //then we can castle==== add just the king move and if the king moves two then move the castle two as well
+                                        finalMoveList.add(new ChessMove(startPosition, new ChessPosition(8, 3), null));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            usingCopyBoard = false;
+            //Black king castle right
+        if (startPosition.equals(new ChessPosition(8, 5))) {
+            if (!bKingMoved && !bRRookMoved) {
+                //no pieces between them
+                if (gameBoard.getPiece(new ChessPosition(8, 7)) == null && gameBoard.getPiece(new ChessPosition(8, 6)) == null) {
+                    //king isn't in check
+                    if (!isInCheck(color)) {
+                        //king isn't castling through check
+                        usingCopyBoard = true;
+                        copyBoard = gameBoard.clone();
+                        copyBoard.addPiece(new ChessPosition(8, 6), new ChessPiece(TeamColor.BLACK, ChessPiece.PieceType.KING));
+                        copyBoard.addPiece(new ChessPosition(8, 5), null);
+                        if (!isInCheck(color)) {
+                            copyBoard = gameBoard.clone();
+                            copyBoard.addPiece(new ChessPosition(8, 7), new ChessPiece(TeamColor.BLACK, ChessPiece.PieceType.KING));
+                            copyBoard.addPiece(new ChessPosition(8, 5), null);
+                            if (!isInCheck(color)) {
+                                //make sure nothing is in 1, 2
+                                usingCopyBoard = false;
+                                if (gameBoard.getPiece(new ChessPosition(8, 6)) == null && gameBoard.getPiece(new ChessPosition(8, 7)) == null) {
+                                    //then we can castle==== add just the king move and if the king moves two then move the castle two as well
+                                    finalMoveList.add(new ChessMove(startPosition, new ChessPosition(8, 7), null));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        usingCopyBoard = false;
+    }
         return finalMoveList;
     }
 
@@ -120,11 +259,57 @@ public class ChessGame {
         //if it can move then move it, if not throw error
         if (canMove) {
             if (move.getPromotionPiece() == null) {
+                if (startPosition.equals(new ChessPosition(1, 5)) && endPosition.equals(new ChessPosition(1, 3)) && piece.getPieceType() == ChessPiece.PieceType.KING) {
+                    gameBoard.addPiece(new ChessPosition(1, 4), new ChessPiece(TeamColor.WHITE, ChessPiece.PieceType.ROOK));
+                    gameBoard.addPiece(new ChessPosition(1, 1),null);
+                    wKingMoved = true;
+                    wLRookMoved = true;
+
+                } else if (startPosition.equals(new ChessPosition(1, 5)) && endPosition.equals(new ChessPosition(1, 7)) && piece.getPieceType() == ChessPiece.PieceType.KING) {
+                    gameBoard.addPiece(new ChessPosition(1, 6), new ChessPiece(TeamColor.WHITE, ChessPiece.PieceType.ROOK));
+                    gameBoard.addPiece(new ChessPosition(1, 8),null);
+                    wKingMoved = true;
+                    wRRookMoved = true;
+
+                } else if (startPosition.equals(new ChessPosition(8, 5)) && endPosition.equals(new ChessPosition(8, 3)) && piece.getPieceType() == ChessPiece.PieceType.KING) {
+                    gameBoard.addPiece(new ChessPosition(8, 4), new ChessPiece(TeamColor.BLACK, ChessPiece.PieceType.ROOK));
+                    gameBoard.addPiece(new ChessPosition(8, 1),null);
+                    bKingMoved = true;
+                    bLRookMoved = true;
+
+                } else if (startPosition.equals(new ChessPosition(8, 5)) && endPosition.equals(new ChessPosition(8, 7)) && piece.getPieceType() == ChessPiece.PieceType.KING) {
+                    gameBoard.addPiece(new ChessPosition(8, 6), new ChessPiece(TeamColor.BLACK, ChessPiece.PieceType.ROOK));
+                    gameBoard.addPiece(new ChessPosition(8, 8),null);
+                    bKingMoved = true;
+                    bRRookMoved = true;
+
+                }
                 gameBoard.addPiece(endPosition, piece);
             } else {
                 gameBoard.addPiece(endPosition, new ChessPiece(teamTurn, move.getPromotionPiece()));
             }
             gameBoard.addPiece(startPosition, null);
+
+            //check to see if kings or rooks have moved
+            if (startPosition.equals(new ChessPosition(1, 1)) && piece.getPieceType().equals(ChessPiece.PieceType.ROOK)) {
+                wLRookMoved = true;
+            }
+            if (startPosition.equals(new ChessPosition(1, 8)) && piece.getPieceType().equals(ChessPiece.PieceType.ROOK)) {
+                wRRookMoved = true;
+            }
+            if (startPosition.equals(new ChessPosition(8, 1)) && piece.getPieceType().equals(ChessPiece.PieceType.ROOK)) {
+                bLRookMoved = true;
+            }
+            if (startPosition.equals(new ChessPosition(8, 8)) && piece.getPieceType().equals(ChessPiece.PieceType.ROOK)) {
+                bRRookMoved = true;
+            }
+            if (startPosition.equals(new ChessPosition(1, 5)) && piece.getPieceType().equals(ChessPiece.PieceType.KING)) {
+                wKingMoved = true;
+            }
+            if (startPosition.equals(new ChessPosition(8, 5)) && piece.getPieceType().equals(ChessPiece.PieceType.KING)) {
+                bKingMoved = true;
+            }
+
 
             //change teams
             if (teamTurn == TeamColor.WHITE) {
