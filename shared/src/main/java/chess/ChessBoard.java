@@ -83,7 +83,7 @@ public class ChessBoard implements Cloneable {
 
     @Override
     public String toString() {
-        return String.format("[%s]\n", Arrays.deepToString(squares));
+        return Arrays.deepToString(squares).replace("], ", "\n");
     }
 
     @Override

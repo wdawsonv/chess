@@ -146,7 +146,8 @@ public class ChessGame {
                     continue;
                 }
 
-                enemyMoves.addAll(validMoves(currPos));
+                //i shouldn't care about valid moves here- i just can't move into check
+                enemyMoves.addAll(currPiece.pieceMoves(gameBoard, currPos));
             }
         }
         for (ChessMove validMove : enemyMoves) {
