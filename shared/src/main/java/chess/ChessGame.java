@@ -15,6 +15,8 @@ public class ChessGame {
 
     private ChessGame.TeamColor teamTurn;
     private ChessBoard gameBoard;
+    private ChessBoard copyBoard;
+    private boolean usingCopyBoard;
 
     public ChessGame() {
 
@@ -22,6 +24,9 @@ public class ChessGame {
 
         gameBoard = new ChessBoard();
         gameBoard.resetBoard();
+
+        copyBoard = gameBoard.clone();
+        usingCopyBoard = false;
     }
 
     /**
@@ -62,7 +67,8 @@ public class ChessGame {
         Collection<ChessMove> allMoveList = piece.pieceMoves(gameBoard, startPosition);
         Collection<ChessMove> finalMoveList = new ArrayList<>();
         for (ChessMove move : allMoveList) {
-            ChessBoard copyBoard = gameBoard.clone();
+            copyBoard = gameBoard.clone();
+            usingCopyBoard = true;
 
             //do the move NOT caring for anything
             if (move.getPromotionPiece() == null) {
@@ -76,6 +82,7 @@ public class ChessGame {
             if (!isInCheck(color)) {
                 finalMoveList.add(move);
             }
+            usingCopyBoard = false;
         }
         return finalMoveList;
     }
@@ -125,6 +132,12 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
+        ChessBoard boardToUse;
+        if (usingCopyBoard) {
+            boardToUse = copyBoard;
+        } else {
+            boardToUse = gameBoard;
+        }
         //go through all opponent's pieces
         //if one of the valid moves for any of them is the black king's position then you're in check
         ChessPosition kingPos = new ChessPosition(1, 1);
@@ -134,11 +147,11 @@ public class ChessGame {
             for (int startingCol = 1; startingCol <= 8; startingCol++) {
                 ChessPosition currPos = new ChessPosition(startingRow, startingCol);
 
-                if (gameBoard.getPiece(currPos) == null) {
+                if (boardToUse.getPiece(currPos) == null) {
                     continue;
                 }
 
-                ChessPiece currPiece = gameBoard.getPiece(currPos);
+                ChessPiece currPiece = boardToUse.getPiece(currPos);
                 if (currPiece.getTeamColor() == teamColor) {
                     if (currPiece.getPieceType() == ChessPiece.PieceType.KING) {
                         kingPos = currPos;
@@ -147,7 +160,7 @@ public class ChessGame {
                 }
 
                 //i shouldn't care about valid moves here- i just can't move into check
-                enemyMoves.addAll(currPiece.pieceMoves(gameBoard, currPos));
+                enemyMoves.addAll(currPiece.pieceMoves(boardToUse, currPos));
             }
         }
         for (ChessMove validMove : enemyMoves) {
