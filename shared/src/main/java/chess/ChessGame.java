@@ -120,6 +120,13 @@ public class ChessGame {
             }
             gameBoard.addPiece(startPosition, null);
 
+            //change teams
+            if (teamTurn == TeamColor.WHITE) {
+                teamTurn = TeamColor.BLACK;
+            } else {
+                teamTurn = TeamColor.WHITE;
+            }
+
         } else {
             throw new InvalidMoveException();
         }
