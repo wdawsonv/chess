@@ -23,6 +23,10 @@ public class ChessGame {
     private boolean wRRookMoved;
     private boolean bLRookMoved;
     private boolean bRRookMoved;
+    private int wPassCol;
+    private int bPassCol;
+    private boolean wPassanted;
+    private boolean bPassanted;
 
     public ChessGame() {
 
@@ -40,6 +44,11 @@ public class ChessGame {
         wRRookMoved = false;
         bLRookMoved = false;
         bRRookMoved = false;
+
+        wPassCol = 100;
+        bPassCol = 100;
+        wPassanted = false;
+        bPassanted = false;
 
     }
 
@@ -223,6 +232,36 @@ public class ChessGame {
         }
         usingCopyBoard = false;
     }
+
+        //en passant
+        //white pawn on 5th row
+        if (color==TeamColor.WHITE && piece.getPieceType().equals(ChessPiece.PieceType.PAWN) && startPosition.getRow() == 5) {
+            //black tried to pass on the left
+            if (bPassCol == (startPosition.getColumn() - 1)) {
+                finalMoveList.add(new ChessMove(startPosition, new ChessPosition(6, startPosition.getColumn()-1), null));
+                wPassanted = true;
+            }
+            //black tried to pass on right
+            if (bPassCol == (startPosition.getColumn() + 1)) {
+                finalMoveList.add(new ChessMove(startPosition, new ChessPosition(6, startPosition.getColumn()+1), null));
+                wPassanted = true;
+            }
+        }
+
+        //black pawn on 4th row
+        if (color==TeamColor.BLACK && piece.getPieceType().equals(ChessPiece.PieceType.PAWN) && startPosition.getRow() == 4) {
+            //white tried to pass on the left
+            if (wPassCol == (startPosition.getColumn() - 1)) {
+                finalMoveList.add(new ChessMove(startPosition, new ChessPosition(3, startPosition.getColumn()-1), null));
+                bPassanted = true;
+            }
+            //white tried to pass on right
+            if (wPassCol == (startPosition.getColumn() + 1)) {
+                finalMoveList.add(new ChessMove(startPosition, new ChessPosition(3, startPosition.getColumn()+1), null));
+                bPassanted = true;
+            }
+        }
+
         return finalMoveList;
     }
 
@@ -259,6 +298,8 @@ public class ChessGame {
         //if it can move then move it, if not throw error
         if (canMove) {
             if (move.getPromotionPiece() == null) {
+
+                //extra steps for if we castled
                 if (startPosition.equals(new ChessPosition(1, 5)) && endPosition.equals(new ChessPosition(1, 3)) && piece.getPieceType() == ChessPiece.PieceType.KING) {
                     gameBoard.addPiece(new ChessPosition(1, 4), new ChessPiece(TeamColor.WHITE, ChessPiece.PieceType.ROOK));
                     gameBoard.addPiece(new ChessPosition(1, 1),null);
@@ -284,6 +325,20 @@ public class ChessGame {
                     bRRookMoved = true;
 
                 }
+
+                //extra steps if en passant just occurred
+                if (wPassanted) {
+                    //remove the pawn behind my end position
+                    gameBoard.addPiece(new ChessPosition(endPosition.getRow()-1, endPosition.getColumn()), null);
+                    wPassanted = false;
+                }
+
+                if (bPassanted) {
+                    //remove the pawn behind my end position
+                    gameBoard.addPiece(new ChessPosition(endPosition.getRow()+1, endPosition.getColumn()), null);
+                    bPassanted = false;
+                }
+
                 gameBoard.addPiece(endPosition, piece);
             } else {
                 gameBoard.addPiece(endPosition, new ChessPiece(teamTurn, move.getPromotionPiece()));
@@ -308,6 +363,22 @@ public class ChessGame {
             }
             if (startPosition.equals(new ChessPosition(8, 5)) && piece.getPieceType().equals(ChessPiece.PieceType.KING)) {
                 bKingMoved = true;
+            }
+
+            //store recent pawn move
+            if (piece.equals(new ChessPiece(TeamColor.WHITE, ChessPiece.PieceType.PAWN))) {
+                if (startPosition.getRow() == 2 && endPosition.getRow() == 4) {
+                    wPassCol = startPosition.getColumn();
+                } else {
+                    wPassCol = 100;
+                }
+            }
+            if (piece.equals(new ChessPiece(TeamColor.BLACK, ChessPiece.PieceType.PAWN))) {
+                if (startPosition.getRow() == 7 && endPosition.getRow() == 5) {
+                    bPassCol = startPosition.getColumn();
+                } else {
+                    bPassCol = 100;
+                }
             }
 
 
