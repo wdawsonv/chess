@@ -502,4 +502,14 @@ public class ChessPiece {
     public int hashCode() {
         return Objects.hash(pieceColor, type);
     }
+
+    @Override
+    public ChessPiece clone() {
+        try {
+            return (ChessPiece) super.clone();
+        } catch (CloneNotSupportedException e) {
+            //should never happen!!!!!!!
+            throw new AssertionError();
+        }
+    }
 }
