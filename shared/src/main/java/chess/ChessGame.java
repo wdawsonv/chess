@@ -97,8 +97,14 @@ public class ChessGame {
         //get piece, start, and end position
         ChessPosition startPosition = move.getStartPosition();
         ChessPosition endPosition = move.getEndPosition();
+        if (gameBoard.getPiece(startPosition) == null) {
+            throw new InvalidMoveException();
+        }
         ChessPiece piece = gameBoard.getPiece(startPosition);
 
+        if (piece.getTeamColor() != teamTurn) {
+            throw new InvalidMoveException();
+        }
         //get a list of all valid moves
         Collection<ChessMove> moves = validMoves(startPosition);
 
