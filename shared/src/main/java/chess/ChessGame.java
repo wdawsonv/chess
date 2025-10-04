@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -11,14 +12,14 @@ import java.util.Collection;
 public class ChessGame {
 
     private ChessGame.TeamColor teamTurn;
-    private ChessBoard board;
+    private ChessBoard gameBoard;
 
     public ChessGame() {
 
         teamTurn = TeamColor.WHITE;
 
-        board = new ChessBoard();
-        board.resetBoard();
+        gameBoard = new ChessBoard();
+        gameBoard.resetBoard();
     }
 
     /**
@@ -53,7 +54,9 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+        ChessPiece piece = gameBoard.getPiece(startPosition);
+        Collection<ChessMove> moveList = piece.pieceMoves(gameBoard, startPosition);
+        return moveList;
     }
 
     /**
@@ -66,7 +69,7 @@ public class ChessGame {
         //get piece, start, and end position
         ChessPosition startPosition = move.getStartPosition();
         ChessPosition endPosition = move.getEndPosition();
-        ChessPiece piece = board.getPiece(startPosition);
+        ChessPiece piece = gameBoard.getPiece(startPosition);
 
         //make sure the move is valid
         //if move is valid
@@ -78,13 +81,14 @@ public class ChessGame {
         //check if the move is valid
         boolean canMove = false;
         for (ChessMove validMove : moves) {
-            if (validMove == move) {
+            if (validMove.equals(move)) {
                 canMove = true;
+                break;
             }
         }
 
         if (canMove) {
-            board.addPiece(endPosition, piece);
+            gameBoard.addPiece(endPosition, piece);
 
 //            ChessPosition
 //            piece.ChessPosition = new ChessPosition(endPosition)
@@ -140,7 +144,7 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-        throw new RuntimeException("Not implemented");
+        gameBoard = board;
     }
 
     /**
