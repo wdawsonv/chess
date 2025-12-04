@@ -1,0 +1,6 @@
+package model;
+
+import com.google.gson.*;
+
+public record User (String username, String password, String email) {}
+
