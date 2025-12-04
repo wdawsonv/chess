@@ -40,6 +40,7 @@ public class ChessBoard implements Cloneable {
     /**
      * Sets the board to the default starting board
      * (How the game of chess normally starts)
+     * testcomment!!!!!!
      */
     public void resetBoard() {
         squares = new ChessPiece[8][8];
