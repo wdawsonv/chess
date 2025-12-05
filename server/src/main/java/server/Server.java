@@ -5,7 +5,9 @@ import dataaccess.MemoryDataAccess;
 import io.javalin.*;
 import io.javalin.http.Context;
 import model.User;
+import model.RegisterResult;
 import com.google.gson.Gson;
+import service.AlreadyTakenException;
 import service.UserService;
 
 public class Server {
@@ -37,10 +39,16 @@ public class Server {
         javalin.stop();
     }
 
-    private void registerRequest(Context ctx) throws DataAccessException {
+    private void registerRequest(Context ctx) throws DataAccessException, AlreadyTakenException {
         User user = new Gson().fromJson(ctx.body(), User.class);
-        user = service.addUser(user);
-        ctx.result(new Gson().toJson(user));
+        try {
+            RegisterResult result = service.register(user);
+            ctx.status(200);
+            ctx.result(new Gson().toJson(result));
+        } catch (AlreadyTakenException e) {
+            ctx.status(403);
+            ctx.result(e.getMessage());
+        }
     }
 
 }

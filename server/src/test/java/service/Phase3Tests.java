@@ -32,23 +32,29 @@ public class Phase3Tests {
         var user1 = new User("username1", "email1", "password1");
         var user2 = new User("username2", "email2", "password2");
         var user3 = new User("username3", "email3", "password3");
-        userService.addUser(user1);
-        userService.addUser(user2);
-        userService.addUser(user3);
+        try {
+            userService.register(user1);
+        } catch (AlreadyTakenException e) {}
+        try {
+            userService.register(user2);
+        } catch (AlreadyTakenException e) {}
+        try {
+            userService.register(user3);
+        } catch (AlreadyTakenException e) {}
 
-        HashMap<String, User> users = userService.listUsers();
+        HashMap<User, String> users = userService.listUsers();
 
-        HashMap<String, User> expectedUsers = new HashMap<>();
-        expectedUsers.put("1", user1);
-        expectedUsers.put("2", user2);
-        expectedUsers.put("3", user3);
+        HashMap<User, String> expectedUsers = new HashMap<>();
+        expectedUsers.put(user1, "1");
+        expectedUsers.put(user2, "2");
+        expectedUsers.put(user3, "3");
 
         boolean identical = false;
-        for (User user : users.values()) {
+        for (User user : users.keySet()) {
             String mainUsername = user.username();
             identical = false;
 
-            for (User expectedUser : expectedUsers.values()) {
+            for (User expectedUser : expectedUsers.keySet()) {
                 String secondaryUsername = expectedUser.username();
 
                 if (mainUsername.equals(secondaryUsername)) {
@@ -68,15 +74,21 @@ public class Phase3Tests {
         var user1 = new User("username1", "email1", "password1");
         var user2 = new User("username2", "email2", "password2");
         var user3 = new User("username3", "email3", "password3");
-        userService.addUser(user1);
-        userService.addUser(user1);
-        userService.addUser(user3);
+        try {
+            userService.register(user1);
+        } catch (AlreadyTakenException e) {}
+        try {
+            userService.register(user1);
+        } catch (AlreadyTakenException e) {}
+        try {
+            userService.register(user3);
+        } catch (AlreadyTakenException e) {}
 
-        HashMap<String, User> users = userService.listUsers();
+        HashMap<User, String> users = userService.listUsers();
 
-        HashMap<String, User> expectedUsers = new HashMap<>();
-        expectedUsers.put("1", user1);
-        expectedUsers.put("2", user3);
+        HashMap<User, String> expectedUsers = new HashMap<>();
+        expectedUsers.put(user1, "1");
+        expectedUsers.put(user3, "2");
 
         assert (helper.messyIdenticalUsers(users, expectedUsers) && helper.noRepeatedUsernames(users, expectedUsers));
     }

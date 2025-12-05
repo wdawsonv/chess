@@ -9,21 +9,37 @@ public class MemoryDataAccess {
     private static String generateToken() {
         return UUID.randomUUID().toString();
     }
-    final private HashMap<String, User> users = new HashMap<>();
+    final private HashMap<User, String> users = new HashMap<>();
 
     public User addUser(User user) {
         user = new User(user.username(), user.password(), user.email());
-        users.put(generateToken(), user);
+        users.put(user, "0");
 
         return user;
+    }
+
+    public String addAuth(User user) {
+        String authToken = generateToken();
+        user = new User(user.username(), user.password(), user.email());
+        users.put(user, authToken);
+        return authToken;
     }
 
     public void deleteUsers() {
         users.clear();
     }
 
-    public HashMap<String, User> listUsers() {
+    public HashMap<User, String> listUsers() {
         return users;
     }
-//    void insertUser(UserData u) throws DataAccessException {}
+
+    public User getUser(String username) {
+        for (User user : users.keySet()) {
+            if (user.username().equals(username)) {
+                return user;
+            }
+        }
+
+        return null;
+    }
 }

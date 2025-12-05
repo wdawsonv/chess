@@ -8,15 +8,15 @@ import java.util.HashMap;
 
 public class Phase3TestHelper {
 
-    public boolean messyIdenticalUsers(HashMap<String, User> map1, HashMap<String, User> map2) {
+    public boolean messyIdenticalUsers(HashMap<User, String> map1, HashMap<User, String> map2) {
 
         boolean firstIdentical = false;
 
-        for (User user : map1.values()) {
+        for (User user : map1.keySet()) {
             String mainUsername = user.username();
             firstIdentical = false;
 
-            for (User expectedUser : map2.values()) {
+            for (User expectedUser : map2.keySet()) {
                 String secondaryUsername = expectedUser.username();
 
                 if (mainUsername.equals(secondaryUsername)) {
@@ -30,11 +30,11 @@ public class Phase3TestHelper {
         }
 
         boolean secondIdentical = false;
-        for (User user : map2.values()) {
+        for (User user : map2.keySet()) {
             String mainUsername = user.username();
             secondIdentical = false;
 
-            for (User expectedUser : map1.values()) {
+            for (User expectedUser : map1.keySet()) {
                 String secondaryUsername = expectedUser.username();
 
                 if (mainUsername.equals(secondaryUsername)) {
@@ -51,12 +51,12 @@ public class Phase3TestHelper {
     }
 
     //checks to see if any usernames are repeated EEK
-    public boolean noRepeatedUsernames(HashMap<String, User> map1, HashMap<String, User> map2) {
+    public boolean noRepeatedUsernames(HashMap<User, String> map1, HashMap<User, String> map2) {
 
-        for (User userFirst : map1.values()) {
+        for (User userFirst : map1.keySet()) {
             int numOfRepeats = 0;
 
-            for (User userSecond : map1.values()) {
+            for (User userSecond : map1.keySet()) {
                 if (userFirst.equals(userSecond)) {
                     numOfRepeats++;
                 }
@@ -66,10 +66,10 @@ public class Phase3TestHelper {
             }
         }
 
-        for (User userFirst : map2.values()) {
+        for (User userFirst : map2.keySet()) {
             int numOfRepeats = 0;
 
-            for (User userSecond : map2.values()) {
+            for (User userSecond : map2.keySet()) {
                 if (userFirst.equals(userSecond)) {
                     numOfRepeats++;
                 }
