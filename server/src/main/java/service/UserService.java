@@ -26,6 +26,22 @@ public class UserService {
         }
     }
 
+    public LoginResult login(LoginRequest user) throws BadPasswordException {
+        String givenUsername = user.username();
+        String givenPassword = user.password();
+
+        if (memoryDataAccess.getUser(user.username()) == null) {
+            throw new MissingUsernameException("username not in database");
+        } else {
+            UserData actualUser = getUser(givenUsername);
+            String actualPassword = actualUser.password();
+            if (givenPassword.equals(actualPassword)) {
+                String authToken = createAuth(user);
+                return new LoginResult(givenUsername, authToken);
+            }
+        }
+    }
+
     public UserData createUser(UserData user) throws DataAccessException {
         return memoryDataAccess.addUser(user);
     }

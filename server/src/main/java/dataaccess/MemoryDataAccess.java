@@ -14,7 +14,6 @@ public class MemoryDataAccess {
     }
     final private List<UserData> users = new ArrayList<>();
     final private List<AuthData> auths = new ArrayList<>();
-//    final private HashMap<UserData, String> users = new HashMap<>();
 
     public UserData addUser(UserData user) {
         user = new UserData(user.username(), user.password(), user.email());
@@ -37,6 +36,11 @@ public class MemoryDataAccess {
 
     public List<UserData> listUsers() {
         return users;
+    }
+
+    //TEMP FOR TESTING
+    public List<AuthData> listAuths() {
+        return auths;
     }
 
     public UserData getUser(String username) {
