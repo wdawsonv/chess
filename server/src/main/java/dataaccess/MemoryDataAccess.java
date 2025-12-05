@@ -51,4 +51,18 @@ public class MemoryDataAccess {
 
         return null;
     }
+
+    public AuthData getAuth(String token) {
+        for (AuthData auth : auths) {
+            if (auth.authToken().equals(token)) {
+                return auth;
+            }
+        }
+
+        return null;
+    }
+
+    public void removeAuth(AuthData authData) {
+        auths.remove(authData);
+    }
 }

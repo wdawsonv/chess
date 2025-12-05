@@ -4,15 +4,9 @@ import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
 import io.javalin.*;
 import io.javalin.http.Context;
-import model.LoginRequest;
-import model.LoginResult;
-import model.UserData;
-import model.RegisterResult;
+import model.*;
 import com.google.gson.Gson;
-import service.AlreadyTakenException;
-import service.BadPasswordException;
-import service.MissingUsernameException;
-import service.UserService;
+import service.*;
 
 public class Server {
 
@@ -29,7 +23,8 @@ public class Server {
 
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
                 .post("/user", this::register)
-                .post("/session", this::login);
+                .post("/session", this::login)
+                .delete("/session", this::logout);
 
         // Register your endpoints and exception handlers here.
 
@@ -73,6 +68,19 @@ public class Server {
             ctx.result(new Gson().toJson("Error: " + e.getMessage()));
         } catch (DataAccessException e) {
             ctx.status(400);
+            ctx.result(new Gson().toJson("Error: " + e.getMessage()));
+        }
+    }
+
+    private void logout(Context ctx) {
+        String token = ctx.header("authorization");
+
+        try {
+            LogoutResult result = service.logout(token);
+            ctx.status(200);
+            ctx.result(new Gson().toJson(result));
+        } catch (UnauthorizedException e) {
+            ctx.status(401);
             ctx.result(new Gson().toJson("Error: " + e.getMessage()));
         }
     }

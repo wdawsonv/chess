@@ -2,6 +2,8 @@ package service;
 
 import dataaccess.DataAccessException;
 import model.LoginRequest;
+import model.LoginResult;
+import model.RegisterResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import model.UserData;
@@ -11,9 +13,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 public class Phase3Tests {
 
-    static final UserService userService = new UserService(new MemoryDataAccess());
+    static final MemoryDataAccess memoryDataAccess = new MemoryDataAccess();
+    static final UserService userService = new UserService(memoryDataAccess);
+
 
     @BeforeEach
     void clearAll() throws DataAccessException {
@@ -21,7 +27,7 @@ public class Phase3Tests {
     }
 
     @Test
-    void registerNewUserPositive() throws DataAccessException {
+    void registerNewUserPositiveTest() throws DataAccessException {
         var user1 = new UserData("username1", "email1", "password1");
         var user2 = new UserData("username2", "email2", "password2");
         var user3 = new UserData("username3", "email3", "password3");
@@ -46,7 +52,7 @@ public class Phase3Tests {
     }
 
     @Test
-    void registerNewUserNegative() throws DataAccessException {
+    void registerNewUserNegativeTest() throws DataAccessException {
         var user1 = new UserData("username1", "email1", "password1");
         var user2 = new UserData("username2", "email2", "password2");
         var user3 = new UserData("username3", "email3", "password3");
@@ -69,18 +75,59 @@ public class Phase3Tests {
         assert (expectedUsers.equals(users));
     }
 
-//    @Test
-//    void loginPositive() throws DataAccessException {
-//        var user1 = new UserData("username1", "email1", "password1");
-//        try {
-//            userService.register(user1);
-//        } catch (AlreadyTakenException e) {}
-//
-//        try {
-//            userService.login(new LoginRequest(user1.username(), user1.password()));
-//        } catch (BadPasswordException e) {}
-//
-//        //hold up gotta make logout stuff first :PPPPP
-//    }
+    @Test
+    void logoutPositiveTest() throws DataAccessException {
+        var user1 = new UserData("username1", "email1", "password1");
+
+        try {
+            RegisterResult register1 = userService.register(user1);
+            userService.logout(register1.authToken());
+
+            assert (memoryDataAccess.getAuth(register1.authToken()) == null);
+        } catch (AlreadyTakenException | UnauthorizedException _) {}
+
+
+    }
+
+    @Test
+    void logoutNegativeTest() throws DataAccessException {
+        var user1 = new UserData("username1", "email1", "password1");
+        try {
+            RegisterResult register1 = userService.register(user1);
+            assertThrows(UnauthorizedException.class, () -> {
+                userService.logout("not an auth token :PPPPPP");
+            });
+
+        } catch (AlreadyTakenException _) {}
+
+
+    }
+    @Test
+    void loginPositiveTest() throws DataAccessException {
+        var user1 = new UserData("username1", "email1", "password1");
+        try {
+            RegisterResult register1 = userService.register(user1);
+            userService.logout(register1.authToken());
+        } catch (AlreadyTakenException | UnauthorizedException _) {}
+
+        try {
+            LoginResult loginfo = userService.login(new LoginRequest(user1.username(), user1.password()));
+            assert (memoryDataAccess.getAuth(loginfo.authToken()) != null);
+        } catch (BadPasswordException | MissingUsernameException _) {}
+    }
+
+    @Test
+    void loginNegativeTest() throws DataAccessException {
+        var user1 = new UserData("username1", "email1", "password1");
+        try {
+            RegisterResult register1 = userService.register(user1);
+            userService.logout(register1.authToken());
+        } catch (AlreadyTakenException | UnauthorizedException _) {}
+
+
+        assertThrows(MissingUsernameException.class, () -> {
+            userService.login(new LoginRequest("incorrect username", user1.password()));
+        });
+    }
 
 }

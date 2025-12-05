@@ -45,6 +45,20 @@ public class UserService {
         }
     }
 
+    public LogoutResult logout(String token) throws UnauthorizedException {
+
+        if (getAuth(token) == null) {
+            throw new UnauthorizedException("error: unauthorized");
+        } else {
+            AuthData auth = getAuth(token);
+            removeAuth(auth);
+            return new LogoutResult();
+        }
+        //find Auth by authdata, if nothing returns throw unauthorized error
+        //if authdata does return then remove authdata from the database and return logout result :P
+
+    }
+
     public UserData createUser(UserData user) throws DataAccessException {
         return memoryDataAccess.addUser(user);
     }
@@ -63,5 +77,13 @@ public class UserService {
 
     public UserData getUser(String username) {
         return memoryDataAccess.getUser(username);
+    }
+
+    private AuthData getAuth(String token) {
+        return memoryDataAccess.getAuth(token);
+    }
+
+    private void removeAuth(AuthData authData) {
+        memoryDataAccess.removeAuth(authData);
     }
 }
