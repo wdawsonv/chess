@@ -1,10 +1,18 @@
 package dataaccess;
 
 import model.*;
-import dataaccess.DataAccessException;
+import java.util.HashMap;
 
-public class MemoryDataAccess implements DataAccess {
-    User addUser(User user) throws DataAccessException;
+public class MemoryDataAccess {
 
+    private int nextId = 1;
+    final private HashMap<Integer, User> users = new HashMap<>();
+
+    public User addUser(User user) {
+        user = new User(user.username(), user.password(), user.email());
+        users.put(nextId++, user);
+
+        return user;
+    }
 //    void insertUser(UserData u) throws DataAccessException {}
 }

@@ -1,5 +1,6 @@
 package service;
 
+import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
 import model.*;
 
@@ -11,11 +12,7 @@ public class UserService {
         this.memoryDataAccess = memoryDataAccess;
     }
 
-
-    public RegisterResult register(RegisterRequest registerRequest) {
-
-        //takes a user and sends it to MDA to #put the guy in
+    public User addUser(User user) throws DataAccessException {
+        return memoryDataAccess.addUser(user);
     }
-    public LoginResult login(LoginRequest loginRequest) {}
-    public void logout(LogoutRequest logoutRequest) {}
 }
