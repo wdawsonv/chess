@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import model.User;
 import dataaccess.MemoryDataAccess;
 import service.UserService;
+import service.Phase3TestHelper;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,6 +18,8 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class Phase3Tests {
+
+    static final Phase3TestHelper helper = new Phase3TestHelper();
     static final UserService userService = new UserService(new MemoryDataAccess());
 
     @BeforeEach
@@ -33,14 +36,31 @@ public class Phase3Tests {
         userService.addUser(user2);
         userService.addUser(user3);
 
-        HashMap<Integer, User> users = userService.listUsers();
+        HashMap<String, User> users = userService.listUsers();
 
-        HashMap<Integer, User> expectedUsers = new HashMap<>();
-        expectedUsers.put(1, user1);
-        expectedUsers.put(2, user2);
-        expectedUsers.put(3, user3);
+        HashMap<String, User> expectedUsers = new HashMap<>();
+        expectedUsers.put("1", user1);
+        expectedUsers.put("2", user2);
+        expectedUsers.put("3", user3);
 
-        assert users.equals(expectedUsers);
+        boolean identical = false;
+        for (User user : users.values()) {
+            String mainUsername = user.username();
+            identical = false;
+
+            for (User expectedUser : expectedUsers.values()) {
+                String secondaryUsername = expectedUser.username();
+
+                if (mainUsername.equals(secondaryUsername)) {
+                    identical = true;
+                    break;
+                }
+            }
+            if (!identical) {
+                break;
+            }
+        }
+        assert helper.messyIdenticalUsers(users, expectedUsers);
     }
 
     @Test
@@ -52,13 +72,13 @@ public class Phase3Tests {
         userService.addUser(user1);
         userService.addUser(user3);
 
-        HashMap<Integer, User> users = userService.listUsers();
+        HashMap<String, User> users = userService.listUsers();
 
-        HashMap<Integer, User> expectedUsers = new HashMap<>();
-        expectedUsers.put(1, user1);
-        expectedUsers.put(2, user3);
+        HashMap<String, User> expectedUsers = new HashMap<>();
+        expectedUsers.put("1", user1);
+        expectedUsers.put("2", user3);
 
-        assert users.equals(expectedUsers);
+        assert (helper.messyIdenticalUsers(users, expectedUsers) && helper.noRepeatedUsernames(users, expectedUsers));
     }
 
 }

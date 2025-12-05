@@ -22,7 +22,7 @@ public class UserService {
         memoryDataAccess.deleteUsers();
     }
 
-    public HashMap<Integer, User> listUsers() throws DataAccessException {
+    public HashMap<String, User> listUsers() throws DataAccessException {
         return memoryDataAccess.listUsers();
     }
 }

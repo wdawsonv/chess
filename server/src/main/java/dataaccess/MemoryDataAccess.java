@@ -2,15 +2,18 @@ package dataaccess;
 
 import model.*;
 import java.util.HashMap;
+import java.util.UUID;
 
 public class MemoryDataAccess {
 
-    private int nextId = 1;
-    final private HashMap<Integer, User> users = new HashMap<>();
+    private static String generateToken() {
+        return UUID.randomUUID().toString();
+    }
+    final private HashMap<String, User> users = new HashMap<>();
 
     public User addUser(User user) {
         user = new User(user.username(), user.password(), user.email());
-        users.put(nextId++, user);
+        users.put(generateToken(), user);
 
         return user;
     }
@@ -19,7 +22,7 @@ public class MemoryDataAccess {
         users.clear();
     }
 
-    public HashMap<Integer, User> listUsers() {
+    public HashMap<String, User> listUsers() {
         return users;
     }
 //    void insertUser(UserData u) throws DataAccessException {}
