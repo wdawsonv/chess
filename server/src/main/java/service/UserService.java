@@ -19,14 +19,14 @@ public class UserService {
     public RegisterResult register(UserData user) throws DataAccessException, AlreadyTakenException {
         if (memoryDataAccess.getUser(user.username()) == null) {
             user = createUser(user);
-            String authToken = createAuth(user);
+            String authToken = createAuth(user.username());
             return new RegisterResult(user.username(), authToken);
         } else {
             throw new AlreadyTakenException("username already taken");
         }
     }
 
-    public LoginResult login(LoginRequest user) throws BadPasswordException {
+    public LoginResult login(LoginRequest user) throws BadPasswordException, MissingUsernameException, DataAccessException {
         String givenUsername = user.username();
         String givenPassword = user.password();
 
@@ -35,9 +35,12 @@ public class UserService {
         } else {
             UserData actualUser = getUser(givenUsername);
             String actualPassword = actualUser.password();
+
             if (givenPassword.equals(actualPassword)) {
-                String authToken = createAuth(user);
+                String authToken = createAuth(givenUsername);
                 return new LoginResult(givenUsername, authToken);
+            } else {
+                throw new BadPasswordException("password is incorrect");
             }
         }
     }
@@ -46,8 +49,8 @@ public class UserService {
         return memoryDataAccess.addUser(user);
     }
 
-    private String createAuth(UserData user) throws DataAccessException {
-        return memoryDataAccess.addAuth(user);
+    private String createAuth(String username) throws DataAccessException {
+        return memoryDataAccess.addAuth(username);
     }
 
     public void deleteUsers() throws DataAccessException {

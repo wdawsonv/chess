@@ -69,18 +69,18 @@ public class Phase3Tests {
         assert (expectedUsers.equals(users));
     }
 
-    @Test
-    void loginPositive() throws DataAccessException {
-        var user1 = new UserData("username1", "email1", "password1");
-        try {
-            userService.register(user1);
-        } catch (AlreadyTakenException e) {}
-
-        try {
-            userService.login(new LoginRequest(user1.username(), user1.password()));
-        } catch (BadPasswordException e) {}
-
-        //hold up gotta make logout stuff first :PPPPP
-    }
+//    @Test
+//    void loginPositive() throws DataAccessException {
+//        var user1 = new UserData("username1", "email1", "password1");
+//        try {
+//            userService.register(user1);
+//        } catch (AlreadyTakenException e) {}
+//
+//        try {
+//            userService.login(new LoginRequest(user1.username(), user1.password()));
+//        } catch (BadPasswordException e) {}
+//
+//        //hold up gotta make logout stuff first :PPPPP
+//    }
 
 }

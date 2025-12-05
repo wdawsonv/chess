@@ -22,9 +22,8 @@ public class MemoryDataAccess {
         return user;
     }
 
-    public String addAuth(UserData user) {
+    public String addAuth(String username) {
         String authToken = generateToken();
-        String username = user.username();
         AuthData userAuth = new AuthData(authToken, username);
         auths.add(userAuth);
         return authToken;
