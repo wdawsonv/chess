@@ -14,5 +14,13 @@ public class MemoryDataAccess {
 
         return user;
     }
+
+    public void deleteUsers() {
+        users.clear();
+    }
+
+    public HashMap<Integer, User> listUsers() {
+        return users;
+    }
 //    void insertUser(UserData u) throws DataAccessException {}
 }
