@@ -1,7 +1,10 @@
 package dataaccess;
 
 import model.*;
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 public class MemoryDataAccess {
@@ -9,19 +12,22 @@ public class MemoryDataAccess {
     private static String generateToken() {
         return UUID.randomUUID().toString();
     }
-    final private HashMap<User, String> users = new HashMap<>();
+    final private List<UserData> users = new ArrayList<>();
+    final private List<AuthData> auths = new ArrayList<>();
+//    final private HashMap<UserData, String> users = new HashMap<>();
 
-    public User addUser(User user) {
-        user = new User(user.username(), user.password(), user.email());
-        users.put(user, "0");
+    public UserData addUser(UserData user) {
+        user = new UserData(user.username(), user.password(), user.email());
+        users.add(user);
 
         return user;
     }
 
-    public String addAuth(User user) {
+    public String addAuth(UserData user) {
         String authToken = generateToken();
-        user = new User(user.username(), user.password(), user.email());
-        users.put(user, authToken);
+        String username = user.username();
+        AuthData userAuth = new AuthData(authToken, username);
+        auths.add(userAuth);
         return authToken;
     }
 
@@ -29,12 +35,12 @@ public class MemoryDataAccess {
         users.clear();
     }
 
-    public HashMap<User, String> listUsers() {
+    public List<UserData> listUsers() {
         return users;
     }
 
-    public User getUser(String username) {
-        for (User user : users.keySet()) {
+    public UserData getUser(String username) {
+        for (UserData user : users) {
             if (user.username().equals(username)) {
                 return user;
             }

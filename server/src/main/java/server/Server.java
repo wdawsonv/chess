@@ -4,7 +4,7 @@ import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
 import io.javalin.*;
 import io.javalin.http.Context;
-import model.User;
+import model.UserData;
 import model.RegisterResult;
 import com.google.gson.Gson;
 import service.AlreadyTakenException;
@@ -24,7 +24,8 @@ public class Server {
         this.service = service;
 
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
-                .post("/user", this::registerRequest);
+                .post("/user", this::registerRequest)
+                .post("/session", this::loginRequest);
 
         // Register your endpoints and exception handlers here.
 
@@ -39,8 +40,8 @@ public class Server {
         javalin.stop();
     }
 
-    private void registerRequest(Context ctx) throws DataAccessException, AlreadyTakenException {
-        User user = new Gson().fromJson(ctx.body(), User.class);
+    private void registerRequest(Context ctx) {
+        UserData user = new Gson().fromJson(ctx.body(), UserData.class);
         try {
             RegisterResult result = service.register(user);
             ctx.status(200);
@@ -48,7 +49,14 @@ public class Server {
         } catch (AlreadyTakenException e) {
             ctx.status(403);
             ctx.result(new Gson().toJson("Error: " + e.getMessage()));
+        } catch (DataAccessException e) {
+            ctx.status(400);
+            ctx.result(new Gson().toJson("Error: " + e.getMessage()));
         }
+    }
+
+    private void loginRequest(Context ctx) {
+
     }
 
 }

@@ -6,6 +6,7 @@ import dataaccess.MemoryDataAccess;
 import model.*;
 
 import java.util.HashMap;
+import java.util.List;
 
 public class UserService {
 
@@ -15,7 +16,7 @@ public class UserService {
         this.memoryDataAccess = memoryDataAccess;
     }
 
-    public RegisterResult register(User user) throws DataAccessException, AlreadyTakenException {
+    public RegisterResult register(UserData user) throws DataAccessException, AlreadyTakenException {
         if (memoryDataAccess.getUser(user.username()) == null) {
             user = createUser(user);
             String authToken = createAuth(user);
@@ -25,11 +26,11 @@ public class UserService {
         }
     }
 
-    public User createUser(User user) throws DataAccessException {
+    public UserData createUser(UserData user) throws DataAccessException {
         return memoryDataAccess.addUser(user);
     }
 
-    private String createAuth(User user) throws DataAccessException {
+    private String createAuth(UserData user) throws DataAccessException {
         return memoryDataAccess.addAuth(user);
     }
 
@@ -37,11 +38,11 @@ public class UserService {
         memoryDataAccess.deleteUsers();
     }
 
-    public HashMap<User, String> listUsers() throws DataAccessException {
+    public List<UserData> listUsers() throws DataAccessException {
         return memoryDataAccess.listUsers();
     }
 
-    public User getUser(String username) {
+    public UserData getUser(String username) {
         return memoryDataAccess.getUser(username);
     }
 }
