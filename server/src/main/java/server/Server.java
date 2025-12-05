@@ -47,7 +47,7 @@ public class Server {
             ctx.result(new Gson().toJson(result));
         } catch (AlreadyTakenException e) {
             ctx.status(403);
-            ctx.result(e.getMessage());
+            ctx.result(new Gson().toJson("Error: " + e.getMessage()));
         }
     }
 
