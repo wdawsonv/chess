@@ -28,7 +28,8 @@ public class Server {
                 .post("/session", this::login)
                 .delete("/session", this::logout)
                 .get("/game", this::listGames)
-                .post("/game", this::createGame);
+                .post("/game", this::createGame)
+                .delete("/db", this::clearAll);
 
         // Register your endpoints and exception handlers here.
 
@@ -103,7 +104,8 @@ public class Server {
     }
 
     private void createGame(Context ctx) {
-        String gameName = new Gson().fromJson(ctx.body(), String.class);
+        CreateRequest request = new Gson().fromJson(ctx.body(), CreateRequest.class);
+        String gameName = request.gameName();
         String token = ctx.header("authorization");
 
         try {
@@ -117,6 +119,11 @@ public class Server {
             ctx.status(400);
             ctx.result(new Gson().toJson("Error: " + e.getMessage()));
         }
+    }
+
+    private void clearAll(Context ctx) {
+        service.clearAllData();
+        ctx.result("{}");
     }
 
 

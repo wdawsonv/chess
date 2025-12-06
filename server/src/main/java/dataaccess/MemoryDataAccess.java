@@ -84,4 +84,17 @@ public class MemoryDataAccess {
         games.add(new GameData(gameID, "", "", gameName, new ChessGame()));
         return new CreateResult(gameID);
     }
+
+    public void clearUserData() {
+        users.clear();
+    }
+
+    public void clearAuthData() {
+        auths.clear();
+    }
+
+    public void clearGameData() {
+        games.clear();
+    }
+
 }

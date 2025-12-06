@@ -114,4 +114,10 @@ public class UserService {
     private List<GameData> getGamesList() {
         return memoryDataAccess.getGamesList();
     }
+
+    public void clearAllData() {
+        memoryDataAccess.clearUserData();
+        memoryDataAccess.clearGameData();
+        memoryDataAccess.clearAuthData();
+    }
 }

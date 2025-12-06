@@ -181,4 +181,21 @@ public class Phase3Tests {
         } catch (AlreadyTakenException | UnauthorizedException _) {}
     }
 
+    @Test
+    void clearDataPositiveTest() throws DataAccessException {
+        var user1 = new UserData("username1", "email1", "password1");
+
+        try {
+            RegisterResult register1 = userService.register(user1);
+            CreateResult result1 = userService.createGame("gamename1", register1.authToken());
+            CreateResult result2 = userService.createGame("gamename2", register1.authToken());
+
+            userService.clearAllData();
+
+            var user2 = new UserData("username1", "email1", "password1");
+            RegisterResult register2 = userService.register(user2);
+            assert(userService.listGames(register2.authToken()).isEmpty());
+        } catch (AlreadyTakenException | UnauthorizedException _) {}
+    }
+
 }
