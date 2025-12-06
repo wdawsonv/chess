@@ -1,6 +1,5 @@
 package service;
 
-import chess.ChessGame;
 import dataaccess.DataAccessException;
 import model.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import dataaccess.MemoryDataAccess;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -34,12 +32,12 @@ public class Phase3Tests {
         } catch (AlreadyTakenException | BadPasswordException e) {}
         try {
             userService.register(user2);
-        } catch (AlreadyTakenException e) {} catch (BadPasswordException e) {
+        } catch (AlreadyTakenException _) {} catch (BadPasswordException e) {
             throw new RuntimeException(e);
         }
         try {
             userService.register(user3);
-        } catch (AlreadyTakenException | BadPasswordException e) {}
+        } catch (AlreadyTakenException | BadPasswordException _) {}
 
         List<UserData> users = userService.listUsers();
 
@@ -220,6 +218,7 @@ public class Phase3Tests {
     @Test
     void addUserWhiteNegativeTest() {
 
+        //another test
         var user1 = new UserData("username1", "email1", "password1");
 
         try {
