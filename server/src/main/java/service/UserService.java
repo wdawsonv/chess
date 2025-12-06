@@ -17,8 +17,11 @@ public class UserService {
         this.memoryDataAccess = memoryDataAccess;
     }
 
-    public RegisterResult register(UserData user) throws DataAccessException, AlreadyTakenException {
+    public RegisterResult register(UserData user) throws DataAccessException, AlreadyTakenException, BadPasswordException {
         if (memoryDataAccess.getUser(user.username()) == null) {
+            if (user.password() == null) {
+                throw new BadPasswordException("must provide a password");
+            }
             user = createUser(user);
             String authToken = createAuth(user.username());
             return new RegisterResult(user.username(), authToken);
@@ -27,9 +30,13 @@ public class UserService {
         }
     }
 
-    public LoginResult login(LoginRequest user) throws BadPasswordException, MissingUsernameException, DataAccessException {
+    public LoginResult login(LoginRequest user) throws BadPasswordException, MissingUsernameException, DataAccessException, BadRequestException {
         String givenUsername = user.username();
         String givenPassword = user.password();
+
+        if (user.username() == null || user.password() == null) {
+            throw new BadRequestException("no username/password provided");
+        }
 
         if (memoryDataAccess.getUser(user.username()) == null) {
             throw new MissingUsernameException("username not in database");
@@ -49,7 +56,7 @@ public class UserService {
     public LogoutResult logout(String token) throws UnauthorizedException {
 
         if (getAuth(token) == null) {
-            throw new UnauthorizedException("error: unauthorized");
+            throw new UnauthorizedException("unauthorized");
         } else {
             AuthData auth = getAuth(token);
             removeAuth(auth);
@@ -63,17 +70,20 @@ public class UserService {
     public List<GameData> listGames(String token) throws UnauthorizedException {
 
         if (getAuth(token) == null) {
-            throw new UnauthorizedException("error: unauthorized");
+            throw new UnauthorizedException("unauthorized");
         } else {
             List<GameData> list = getGamesList();
             return list;
         }
     }
 
-    public CreateResult createGame(String gameName, String token) throws UnauthorizedException, AlreadyTakenException {
+    public CreateResult createGame(String gameName, String token) throws UnauthorizedException, AlreadyTakenException, BadRequestException {
 
+        if (gameName == null) {
+            throw new BadRequestException("no gamename included");
+        }
         if (getAuth(token) == null) {
-            throw new UnauthorizedException("error: unauthorized");
+            throw new UnauthorizedException("unauthorized");
         } else {
             return createNewGame(gameName);
         }
@@ -119,5 +129,21 @@ public class UserService {
         memoryDataAccess.clearUserData();
         memoryDataAccess.clearGameData();
         memoryDataAccess.clearAuthData();
+    }
+
+    public JoinResult joinGame(int gameID, String color, String authToken) throws UnauthorizedException, AlreadyTakenException, DataAccessException, BadRequestException {
+
+        if (getAuth(authToken) == null) {
+            throw new UnauthorizedException("unauthorized");
+        } else {
+            AuthData userAuthData = memoryDataAccess.getAuth(authToken);
+            String username = userAuthData.username();
+
+            return joinExistingGame(gameID, color, username);
+        }
+    }
+
+    private JoinResult joinExistingGame(int gameID, String color, String username) throws AlreadyTakenException, DataAccessException, BadRequestException {
+        return memoryDataAccess.joinExistingGame(gameID, color, username);
     }
 }

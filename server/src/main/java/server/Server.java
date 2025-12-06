@@ -8,7 +8,9 @@ import model.*;
 import com.google.gson.Gson;
 import service.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Server {
 
@@ -29,6 +31,7 @@ public class Server {
                 .delete("/session", this::logout)
                 .get("/game", this::listGames)
                 .post("/game", this::createGame)
+                .put("/game", this::joinGame)
                 .delete("/db", this::clearAll);
 
         // Register your endpoints and exception handlers here.
@@ -52,10 +55,11 @@ public class Server {
             ctx.result(new Gson().toJson(result));
         } catch (AlreadyTakenException e) {
             ctx.status(403);
-            ctx.result(new Gson().toJson("Error: " + e.getMessage()));
-        } catch (DataAccessException e) {
+            ctx.json("{ \"message\": \"Error: " + e.getMessage() + "\" }");
+        } catch (DataAccessException | BadPasswordException e) {
             ctx.status(400);
-            ctx.result(new Gson().toJson("Error: " + e.getMessage()));
+            ctx.json("{ \"message\": \"Error: " + e.getMessage() + "\" }");
+//            ctx.result(new Gson().toJson("Error: " + e.getMessage()));
         }
     }
 
@@ -65,15 +69,12 @@ public class Server {
             LoginResult result = service.login(user);
             ctx.status(200);
             ctx.result(new Gson().toJson(result));
-        } catch (BadPasswordException e) {
+        } catch (BadPasswordException | MissingUsernameException e) {
+            ctx.status(401);
+            ctx.json("{ \"message\": \"Error: " + e.getMessage() + "\" }");
+        } catch (DataAccessException | BadRequestException e) {
             ctx.status(400);
-            ctx.result(new Gson().toJson("Error: " + e.getMessage()));
-        } catch (MissingUsernameException e) {
-            ctx.status(400);
-            ctx.result(new Gson().toJson("Error: " + e.getMessage()));
-        } catch (DataAccessException e) {
-            ctx.status(400);
-            ctx.result(new Gson().toJson("Error: " + e.getMessage()));
+            ctx.json("{ \"message\": \"Error: " + e.getMessage() + "\" }");
         }
     }
 
@@ -86,7 +87,7 @@ public class Server {
             ctx.result(new Gson().toJson(result));
         } catch (UnauthorizedException e) {
             ctx.status(401);
-            ctx.result(new Gson().toJson("Error: " + e.getMessage()));
+            ctx.json("{ \"message\": \"Error: " + e.getMessage() + "\" }");
         }
     }
 
@@ -95,11 +96,14 @@ public class Server {
 
         try {
             List<GameData> gList = service.listGames(token);
+            Map<String, Object> temp = new HashMap<>();
+            temp.put("games", gList);
             ctx.status(200);
-            ctx.result(new Gson().toJson(gList));
+            ctx.result(new Gson().toJson(temp));
+//            ctx.result(new Gson().toJson(gList));
         } catch (UnauthorizedException e) {
             ctx.status(401);
-            ctx.result(new Gson().toJson("Error: " + e.getMessage()));
+            ctx.json("{ \"message\": \"Error: " + e.getMessage() + "\" }");
         }
     }
 
@@ -114,11 +118,34 @@ public class Server {
             ctx.result(new Gson().toJson(createdGame));
         } catch (UnauthorizedException e) {
             ctx.status(401);
-            ctx.result(new Gson().toJson("Error: " + e.getMessage()));
-        } catch (AlreadyTakenException e) {
+            ctx.json("{ \"message\": \"Error: " + e.getMessage() + "\" }");
+        } catch (AlreadyTakenException | BadRequestException e) {
             ctx.status(400);
-            ctx.result(new Gson().toJson("Error: " + e.getMessage()));
+            ctx.json("{ \"message\": \"Error: " + e.getMessage() + "\" }");
         }
+    }
+
+    private void joinGame(Context ctx) {
+        JoinRequest request = new Gson().fromJson(ctx.body(), JoinRequest.class);
+        String color = request.playerColor();
+        int gameID = request.gameID();
+        String token = ctx.header("authorization");
+
+        try {
+            JoinResult joinedGame = service.joinGame(gameID, color, token);
+            ctx.status(200);
+            ctx.result(new Gson().toJson(joinedGame));
+        } catch (UnauthorizedException e) {
+            ctx.status(401);
+            ctx.json("{ \"message\": \"Error: " + e.getMessage() + "\" }");
+        } catch (AlreadyTakenException e) {
+            ctx.status(403);
+            ctx.json("{ \"message\": \"Error: " + e.getMessage() + "\" }");
+        } catch (DataAccessException | BadRequestException e) {
+            ctx.status(400);
+            ctx.json("{ \"message\": \"Error: " + e.getMessage() + "\" }");
+        }
+
     }
 
     private void clearAll(Context ctx) {

@@ -3,6 +3,7 @@ package dataaccess;
 import chess.ChessGame;
 import model.*;
 import service.AlreadyTakenException;
+import service.BadRequestException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -81,7 +82,7 @@ public class MemoryDataAccess {
             }
         }
         gameID++;
-        games.add(new GameData(gameID, "", "", gameName, new ChessGame()));
+        games.add(new GameData(gameID, null, null, gameName, new ChessGame()));
         return new CreateResult(gameID);
     }
 
@@ -95,6 +96,50 @@ public class MemoryDataAccess {
 
     public void clearGameData() {
         games.clear();
+    }
+
+    public JoinResult joinExistingGame(int gameID, String color, String username) throws DataAccessException, AlreadyTakenException, BadRequestException {
+        boolean gameFound = false;
+        GameData requestedGame = new GameData(0, "", "", "", new ChessGame());
+
+        for (GameData game : games) {
+            if (game.gameID() == gameID) {
+                requestedGame = game;
+                gameFound = true;
+            }
+        }
+
+        if (!gameFound) {
+            throw new DataAccessException("error: game ID not found");
+        } if (color == null) {
+            throw new BadRequestException("no color provided");
+        } else if (color.equals("WHITE") && !(requestedGame.whiteUsername() == null)) {
+            throw new AlreadyTakenException("error: there is already a player on white team");
+        } else if (color.equals("BLACK") && !(requestedGame.blackUsername() == null)) {
+            throw new AlreadyTakenException("error: there is already a player on black team");
+        } else if (color.equals("WHITE")) {
+
+            GameData requestedGameNewUser = new GameData(requestedGame.gameID(), username, requestedGame.blackUsername(), requestedGame.gameName(), requestedGame.game());
+            for (int i = 0; i < games.size(); i++) {
+                if (games.get(i).gameID() == gameID) {
+                    games.set(i, requestedGameNewUser);
+                    break;
+                }
+            }
+        } else if (color.equals("BLACK")) {
+
+            GameData requestedGameNewUser = new GameData(requestedGame.gameID(), requestedGame.whiteUsername(), username, requestedGame.gameName(), requestedGame.game());
+            for (int i = 0; i < games.size(); i++) {
+                if (games.get(i).gameID() == gameID) {
+                    games.set(i, requestedGameNewUser);
+                    break;
+                }
+            }
+        } else {
+            throw new BadRequestException("invalid color provided");
+        }
+
+        return new JoinResult();
     }
 
 }

@@ -31,13 +31,15 @@ public class Phase3Tests {
         var user3 = new UserData("username3", "email3", "password3");
         try {
             userService.register(user1);
-        } catch (AlreadyTakenException e) {}
+        } catch (AlreadyTakenException | BadPasswordException e) {}
         try {
             userService.register(user2);
-        } catch (AlreadyTakenException e) {}
+        } catch (AlreadyTakenException e) {} catch (BadPasswordException e) {
+            throw new RuntimeException(e);
+        }
         try {
             userService.register(user3);
-        } catch (AlreadyTakenException e) {}
+        } catch (AlreadyTakenException | BadPasswordException e) {}
 
         List<UserData> users = userService.listUsers();
 
@@ -56,13 +58,13 @@ public class Phase3Tests {
         var user3 = new UserData("username3", "email3", "password3");
         try {
             userService.register(user1);
-        } catch (AlreadyTakenException e) {}
+        } catch (AlreadyTakenException | BadPasswordException e) {}
         try {
             userService.register(user1);
-        } catch (AlreadyTakenException e) {}
+        } catch (AlreadyTakenException | BadPasswordException e) {}
         try {
             userService.register(user3);
-        } catch (AlreadyTakenException e) {}
+        } catch (AlreadyTakenException | BadPasswordException e) {}
 
         List<UserData> users = userService.listUsers();
 
@@ -82,7 +84,7 @@ public class Phase3Tests {
             userService.logout(register1.authToken());
 
             assert (memoryDataAccess.getAuth(register1.authToken()) == null);
-        } catch (AlreadyTakenException | UnauthorizedException _) {}
+        } catch (AlreadyTakenException | UnauthorizedException | BadPasswordException _) {}
 
 
     }
@@ -96,7 +98,7 @@ public class Phase3Tests {
                 userService.logout("not an auth token :PPPPPP");
             });
 
-        } catch (AlreadyTakenException _) {}
+        } catch (AlreadyTakenException | BadPasswordException _) {}
 
 
     }
@@ -106,12 +108,12 @@ public class Phase3Tests {
         try {
             RegisterResult register1 = userService.register(user1);
             userService.logout(register1.authToken());
-        } catch (AlreadyTakenException | UnauthorizedException _) {}
+        } catch (AlreadyTakenException | UnauthorizedException | BadPasswordException _) {}
 
         try {
             LoginResult loginfo = userService.login(new LoginRequest(user1.username(), user1.password()));
             assert (memoryDataAccess.getAuth(loginfo.authToken()) != null);
-        } catch (BadPasswordException | MissingUsernameException _) {}
+        } catch (BadPasswordException | MissingUsernameException | BadRequestException e) {}
     }
 
     @Test
@@ -120,7 +122,7 @@ public class Phase3Tests {
         try {
             RegisterResult register1 = userService.register(user1);
             userService.logout(register1.authToken());
-        } catch (AlreadyTakenException | UnauthorizedException _) {}
+        } catch (AlreadyTakenException | UnauthorizedException | BadPasswordException _) {}
 
 
         assertThrows(MissingUsernameException.class, () -> {
@@ -138,7 +140,7 @@ public class Phase3Tests {
             CreateResult result2 = userService.createGame("gamename2", register1.authToken());
 
             assert(result1.gameID() == 1001 && result2.gameID() == 1002);
-        } catch (AlreadyTakenException | UnauthorizedException _) {}
+        } catch (AlreadyTakenException | UnauthorizedException | BadPasswordException | BadRequestException e) {}
     }
 
     @Test
@@ -151,7 +153,7 @@ public class Phase3Tests {
             assertThrows(AlreadyTakenException.class, () -> {
                 CreateResult result2 = userService.createGame("gamename4", register1.authToken());
             });
-        } catch (UnauthorizedException _) {}
+        } catch (UnauthorizedException | BadPasswordException | BadRequestException _) {}
     }
 
     @Test
@@ -164,7 +166,7 @@ public class Phase3Tests {
             CreateResult result2 = userService.createGame("gamename2", register1.authToken());
 
             assert(userService.listGames(register1.authToken()).size() == 2);
-        } catch (AlreadyTakenException | UnauthorizedException _) {}
+        } catch (AlreadyTakenException | UnauthorizedException | BadPasswordException | BadRequestException _) {}
     }
 
     @Test
@@ -178,7 +180,7 @@ public class Phase3Tests {
             assertThrows(UnauthorizedException.class, () -> {
                 userService.listGames("bad token");
             });
-        } catch (AlreadyTakenException | UnauthorizedException _) {}
+        } catch (AlreadyTakenException | UnauthorizedException | BadPasswordException | BadRequestException _) {}
     }
 
     @Test
@@ -195,7 +197,43 @@ public class Phase3Tests {
             var user2 = new UserData("username1", "email1", "password1");
             RegisterResult register2 = userService.register(user2);
             assert(userService.listGames(register2.authToken()).isEmpty());
-        } catch (AlreadyTakenException | UnauthorizedException _) {}
+        } catch (AlreadyTakenException | UnauthorizedException | BadPasswordException | BadRequestException _) {}
     }
 
+    @Test
+    void addUserWhitePositiveTest() {
+
+        var user1 = new UserData("username1", "email1", "password1");
+
+        try {
+            RegisterResult register1 = userService.register(user1);
+            CreateResult result1 = userService.createGame("gamename1", register1.authToken());
+            userService.joinGame(1001, "WHITE", register1.authToken());
+
+            var user2 = new UserData("username1", "email1", "password1");
+            RegisterResult register2 = userService.register(user2);
+
+            //get games (first game) should have username1 on white team
+            assert(memoryDataAccess.getGamesList().getFirst().whiteUsername().equals("username1"));
+        } catch (AlreadyTakenException | UnauthorizedException | DataAccessException | BadPasswordException | BadRequestException _) {}
+    }
+    @Test
+    void addUserWhiteNegativeTest() {
+
+        var user1 = new UserData("username1", "email1", "password1");
+
+        try {
+            RegisterResult register1 = userService.register(user1);
+            CreateResult result1 = userService.createGame("gamename1", register1.authToken());
+            userService.joinGame(1001, "WHITE", register1.authToken());
+
+            var user2 = new UserData("username1", "email1", "password1");
+            RegisterResult register2 = userService.register(user2);
+
+            assertThrows(AlreadyTakenException.class, () -> {
+                userService.joinGame(1001, "WHITE", register2.authToken());
+            });
+
+        } catch (AlreadyTakenException | UnauthorizedException | DataAccessException | BadPasswordException | BadRequestException _) {}
+    }
 }
