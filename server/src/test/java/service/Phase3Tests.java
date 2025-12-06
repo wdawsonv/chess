@@ -130,4 +130,6 @@ public class Phase3Tests {
         });
     }
 
+    //create addgame functionality before making tests for list and create game
+
 }

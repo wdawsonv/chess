@@ -14,6 +14,7 @@ public class MemoryDataAccess {
     }
     final private List<UserData> users = new ArrayList<>();
     final private List<AuthData> auths = new ArrayList<>();
+    final private List<GameData> games = new ArrayList<>();
 
     public UserData addUser(UserData user) {
         user = new UserData(user.username(), user.password(), user.email());
@@ -64,5 +65,9 @@ public class MemoryDataAccess {
 
     public void removeAuth(AuthData authData) {
         auths.remove(authData);
+    }
+
+    public List<GameData> getGamesList() {
+        return games;
     }
 }

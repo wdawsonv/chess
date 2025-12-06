@@ -3,6 +3,7 @@ package service;
 import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
 
+import io.javalin.http.UnauthorizedResponse;
 import model.*;
 
 import java.util.HashMap;
@@ -59,6 +60,16 @@ public class UserService {
 
     }
 
+    public List<GameData> listGames(String token) throws UnauthorizedException {
+
+        if (getAuth(token) == null) {
+            throw new UnauthorizedException("error: unauthorized");
+        } else {
+            List<GameData> list = getGamesList();
+            return list;
+        }
+    }
+
     public UserData createUser(UserData user) throws DataAccessException {
         return memoryDataAccess.addUser(user);
     }
@@ -85,5 +96,9 @@ public class UserService {
 
     private void removeAuth(AuthData authData) {
         memoryDataAccess.removeAuth(authData);
+    }
+
+    private List<GameData> getGamesList() {
+        return memoryDataAccess.getGamesList();
     }
 }

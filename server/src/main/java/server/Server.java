@@ -8,6 +8,8 @@ import model.*;
 import com.google.gson.Gson;
 import service.*;
 
+import java.util.List;
+
 public class Server {
 
     private final Javalin javalin;
@@ -24,7 +26,8 @@ public class Server {
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
                 .post("/user", this::register)
                 .post("/session", this::login)
-                .delete("/session", this::logout);
+                .delete("/session", this::logout)
+                .get("/game", this::listGames);
 
         // Register your endpoints and exception handlers here.
 
@@ -79,6 +82,19 @@ public class Server {
             LogoutResult result = service.logout(token);
             ctx.status(200);
             ctx.result(new Gson().toJson(result));
+        } catch (UnauthorizedException e) {
+            ctx.status(401);
+            ctx.result(new Gson().toJson("Error: " + e.getMessage()));
+        }
+    }
+
+    private void listGames(Context ctx) {
+        String token = ctx.header("authorization");
+
+        try {
+            List<GameData> gList = service.listGames(token);
+            ctx.status(200);
+            ctx.result(new Gson().toJson(gList));
         } catch (UnauthorizedException e) {
             ctx.status(401);
             ctx.result(new Gson().toJson("Error: " + e.getMessage()));
