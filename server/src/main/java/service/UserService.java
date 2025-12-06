@@ -70,6 +70,19 @@ public class UserService {
         }
     }
 
+    public CreateResult createGame(String gameName, String token) throws UnauthorizedException, AlreadyTakenException {
+
+        if (getAuth(token) == null) {
+            throw new UnauthorizedException("error: unauthorized");
+        } else {
+            return createNewGame(gameName);
+        }
+    }
+
+    private CreateResult createNewGame(String gameName) throws AlreadyTakenException {
+        return memoryDataAccess.createNewGame(gameName);
+    }
+
     public UserData createUser(UserData user) throws DataAccessException {
         return memoryDataAccess.addUser(user);
     }

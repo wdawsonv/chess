@@ -1,12 +1,10 @@
 package service;
 
+import chess.ChessGame;
 import dataaccess.DataAccessException;
-import model.LoginRequest;
-import model.LoginResult;
-import model.RegisterResult;
+import model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import model.UserData;
 import dataaccess.MemoryDataAccess;
 
 import java.util.ArrayList;
@@ -130,6 +128,57 @@ public class Phase3Tests {
         });
     }
 
-    //create addgame functionality before making tests for list and create game
+    @Test
+    void createGamePositiveTest() throws DataAccessException {
+        var user1 = new UserData("username1", "email1", "password1");
+
+        try {
+            RegisterResult register1 = userService.register(user1);
+            CreateResult result1 = userService.createGame("gamename1", register1.authToken());
+            CreateResult result2 = userService.createGame("gamename2", register1.authToken());
+
+            assert(result1.gameID() == 1001 && result2.gameID() == 1002);
+        } catch (AlreadyTakenException | UnauthorizedException _) {}
+    }
+
+    @Test
+    void createGameNegativeTest() throws DataAccessException, AlreadyTakenException{
+        var user1 = new UserData("username1", "email1", "password1");
+
+        try {
+            RegisterResult register1 = userService.register(user1);
+            CreateResult result1 = userService.createGame("gamename4", register1.authToken());
+            assertThrows(AlreadyTakenException.class, () -> {
+                CreateResult result2 = userService.createGame("gamename4", register1.authToken());
+            });
+        } catch (UnauthorizedException _) {}
+    }
+
+    @Test
+    void listGamesPositiveTest() throws DataAccessException {
+        var user1 = new UserData("username1", "email1", "password1");
+
+        try {
+            RegisterResult register1 = userService.register(user1);
+            CreateResult result1 = userService.createGame("gamename1", register1.authToken());
+            CreateResult result2 = userService.createGame("gamename2", register1.authToken());
+
+            assert(userService.listGames(register1.authToken()).size() == 2);
+        } catch (AlreadyTakenException | UnauthorizedException _) {}
+    }
+
+    @Test
+    void listGamesNegativeTest() throws DataAccessException {
+        var user1 = new UserData("username1", "email1", "password1");
+
+        try {
+            RegisterResult register1 = userService.register(user1);
+            CreateResult result1 = userService.createGame("gamename1", register1.authToken());
+            CreateResult result2 = userService.createGame("gamename2", register1.authToken());
+            assertThrows(UnauthorizedException.class, () -> {
+                userService.listGames("bad token");
+            });
+        } catch (AlreadyTakenException | UnauthorizedException _) {}
+    }
 
 }

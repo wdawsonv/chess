@@ -27,7 +27,8 @@ public class Server {
                 .post("/user", this::register)
                 .post("/session", this::login)
                 .delete("/session", this::logout)
-                .get("/game", this::listGames);
+                .get("/game", this::listGames)
+                .post("/game", this::createGame);
 
         // Register your endpoints and exception handlers here.
 
@@ -97,6 +98,23 @@ public class Server {
             ctx.result(new Gson().toJson(gList));
         } catch (UnauthorizedException e) {
             ctx.status(401);
+            ctx.result(new Gson().toJson("Error: " + e.getMessage()));
+        }
+    }
+
+    private void createGame(Context ctx) {
+        String gameName = new Gson().fromJson(ctx.body(), String.class);
+        String token = ctx.header("authorization");
+
+        try {
+            CreateResult createdGame = service.createGame(gameName, token);
+            ctx.status(200);
+            ctx.result(new Gson().toJson(createdGame));
+        } catch (UnauthorizedException e) {
+            ctx.status(401);
+            ctx.result(new Gson().toJson("Error: " + e.getMessage()));
+        } catch (AlreadyTakenException e) {
+            ctx.status(400);
             ctx.result(new Gson().toJson("Error: " + e.getMessage()));
         }
     }

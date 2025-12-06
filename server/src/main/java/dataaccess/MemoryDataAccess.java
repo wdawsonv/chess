@@ -1,6 +1,8 @@
 package dataaccess;
 
+import chess.ChessGame;
 import model.*;
+import service.AlreadyTakenException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,6 +17,7 @@ public class MemoryDataAccess {
     final private List<UserData> users = new ArrayList<>();
     final private List<AuthData> auths = new ArrayList<>();
     final private List<GameData> games = new ArrayList<>();
+    private int gameID = 1000;
 
     public UserData addUser(UserData user) {
         user = new UserData(user.username(), user.password(), user.email());
@@ -69,5 +72,16 @@ public class MemoryDataAccess {
 
     public List<GameData> getGamesList() {
         return games;
+    }
+
+    public CreateResult createNewGame(String gameName) throws AlreadyTakenException {
+        for (GameData game : games) {
+            if (game.gameName().equals(gameName)) {
+                throw new AlreadyTakenException("game name already in use, please choose new name");
+            }
+        }
+        gameID++;
+        games.add(new GameData(gameID, "", "", gameName, new ChessGame()));
+        return new CreateResult(gameID);
     }
 }
