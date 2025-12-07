@@ -13,13 +13,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class Phase3Tests {
 
-    static final MemoryDataAccess memoryDataAccess = new MemoryDataAccess();
-    static final UserService userService = new UserService(memoryDataAccess);
+    static final MemoryDataAccess MemoryDataAccess = new MemoryDataAccess();
+    static final UserService UserService = new UserService(MemoryDataAccess);
 
 
     @BeforeEach
     void clearAll() throws DataAccessException {
-        userService.deleteUsers();
+        UserService.deleteUsers();
     }
 
     @Test
@@ -28,18 +28,18 @@ public class Phase3Tests {
         var user2 = new UserData("username2", "email2", "password2");
         var user3 = new UserData("username3", "email3", "password3");
         try {
-            userService.register(user1);
+            UserService.register(user1);
         } catch (AlreadyTakenException | BadPasswordException e) {}
         try {
-            userService.register(user2);
+            UserService.register(user2);
         } catch (AlreadyTakenException e) {} catch (BadPasswordException e) {
             throw new RuntimeException(e);
         }
         try {
-            userService.register(user3);
+            UserService.register(user3);
         } catch (AlreadyTakenException | BadPasswordException e) {}
 
-        List<UserData> users = userService.listUsers();
+        List<UserData> users = UserService.listUsers();
 
         List<UserData> expectedUsers = new ArrayList<>();
         expectedUsers.add(user1);
@@ -54,16 +54,16 @@ public class Phase3Tests {
         var user1 = new UserData("username1", "email1", "password1");
         var user3 = new UserData("username3", "email3", "password3");
         try {
-            userService.register(user1);
+            UserService.register(user1);
         } catch (AlreadyTakenException | BadPasswordException e) {}
         try {
-            userService.register(user1);
+            UserService.register(user1);
         } catch (AlreadyTakenException | BadPasswordException e) {}
         try {
-            userService.register(user3);
+            UserService.register(user3);
         } catch (AlreadyTakenException | BadPasswordException e) {}
 
-        List<UserData> users = userService.listUsers();
+        List<UserData> users = UserService.listUsers();
 
         List<UserData> expectedUsers = new ArrayList<>();
         expectedUsers.add(user1);
@@ -77,10 +77,10 @@ public class Phase3Tests {
         var user1 = new UserData("username1", "email1", "password1");
 
         try {
-            RegisterResult register1 = userService.register(user1);
-            userService.logout(register1.authToken());
+            RegisterResult register1 = UserService.register(user1);
+            UserService.logout(register1.authToken());
 
-            assert (memoryDataAccess.getAuth(register1.authToken()) == null);
+            assert (MemoryDataAccess.getAuth(register1.authToken()) == null);
         } catch (AlreadyTakenException | UnauthorizedException | BadPasswordException e) {}
 
 
@@ -90,8 +90,8 @@ public class Phase3Tests {
     void logoutNegativeTest() throws DataAccessException {
         var user1 = new UserData("username1", "email1", "password1");
         try {
-            userService.register(user1);
-            assertThrows(UnauthorizedException.class, () -> userService.logout("not an auth token :PPPPPP"));
+            UserService.register(user1);
+            assertThrows(UnauthorizedException.class, () -> UserService.logout("not an auth token :PPPPPP"));
 
         } catch (AlreadyTakenException | BadPasswordException e) {}
 
@@ -101,13 +101,13 @@ public class Phase3Tests {
     void loginPositiveTest() throws DataAccessException {
         var user1 = new UserData("username1", "email1", "password1");
         try {
-            RegisterResult register1 = userService.register(user1);
-            userService.logout(register1.authToken());
+            RegisterResult register1 = UserService.register(user1);
+            UserService.logout(register1.authToken());
         } catch (AlreadyTakenException | UnauthorizedException | BadPasswordException e) {}
 
         try {
-            LoginResult loginfo = userService.login(new LoginRequest(user1.username(), user1.password()));
-            assert (memoryDataAccess.getAuth(loginfo.authToken()) != null);
+            LoginResult loginfo = UserService.login(new LoginRequest(user1.username(), user1.password()));
+            assert (MemoryDataAccess.getAuth(loginfo.authToken()) != null);
         } catch (BadPasswordException | MissingUsernameException | BadRequestException e) {}
     }
 
@@ -115,12 +115,12 @@ public class Phase3Tests {
     void loginNegativeTest() throws DataAccessException {
         var user1 = new UserData("username1", "email1", "password1");
         try {
-            RegisterResult register1 = userService.register(user1);
-            userService.logout(register1.authToken());
+            RegisterResult register1 = UserService.register(user1);
+            UserService.logout(register1.authToken());
         } catch (AlreadyTakenException | UnauthorizedException | BadPasswordException e) {}
 
 
-        assertThrows(MissingUsernameException.class, () -> userService.login(new LoginRequest("incorrect username", user1.password())));
+        assertThrows(MissingUsernameException.class, () -> UserService.login(new LoginRequest("incorrect username", user1.password())));
     }
 
     @Test
@@ -128,9 +128,9 @@ public class Phase3Tests {
         var user1 = new UserData("username1", "email1", "password1");
 
         try {
-            RegisterResult register1 = userService.register(user1);
-            CreateResult result1 = userService.createGame("gamename1", register1.authToken());
-            CreateResult result2 = userService.createGame("gamename2", register1.authToken());
+            RegisterResult register1 = UserService.register(user1);
+            CreateResult result1 = UserService.createGame("gamename1", register1.authToken());
+            CreateResult result2 = UserService.createGame("gamename2", register1.authToken());
 
             assert(result1.gameID() == 1001 && result2.gameID() == 1002);
         } catch (AlreadyTakenException | UnauthorizedException | BadPasswordException | BadRequestException e) {}
@@ -141,9 +141,9 @@ public class Phase3Tests {
         var user1 = new UserData("username1", "email1", "password1");
 
         try {
-            RegisterResult register1 = userService.register(user1);
-            userService.createGame("gamename4", register1.authToken());
-            assertThrows(AlreadyTakenException.class, () -> userService.createGame("gamename4", register1.authToken()));
+            RegisterResult register1 = UserService.register(user1);
+            UserService.createGame("gamename4", register1.authToken());
+            assertThrows(AlreadyTakenException.class, () -> UserService.createGame("gamename4", register1.authToken()));
         } catch (UnauthorizedException | BadPasswordException | BadRequestException e) {}
     }
 
@@ -152,11 +152,11 @@ public class Phase3Tests {
         var user1 = new UserData("username1", "email1", "password1");
 
         try {
-            RegisterResult register1 = userService.register(user1);
-            userService.createGame("gamename1", register1.authToken());
-            userService.createGame("gamename2", register1.authToken());
+            RegisterResult register1 = UserService.register(user1);
+            UserService.createGame("gamename1", register1.authToken());
+            UserService.createGame("gamename2", register1.authToken());
 
-            assert(userService.listGames(register1.authToken()).size() == 2);
+            assert(UserService.listGames(register1.authToken()).size() == 2);
         } catch (AlreadyTakenException | UnauthorizedException | BadPasswordException | BadRequestException e) {}
     }
 
@@ -165,10 +165,10 @@ public class Phase3Tests {
         var user1 = new UserData("username1", "email1", "password1");
 
         try {
-            RegisterResult register1 = userService.register(user1);
-            userService.createGame("gamename1", register1.authToken());
-            userService.createGame("gamename2", register1.authToken());
-            assertThrows(UnauthorizedException.class, () -> userService.listGames("bad token"));
+            RegisterResult register1 = UserService.register(user1);
+            UserService.createGame("gamename1", register1.authToken());
+            UserService.createGame("gamename2", register1.authToken());
+            assertThrows(UnauthorizedException.class, () -> UserService.listGames("bad token"));
         } catch (AlreadyTakenException | UnauthorizedException | BadPasswordException | BadRequestException e) {}
     }
 
@@ -177,15 +177,15 @@ public class Phase3Tests {
         var user1 = new UserData("username1", "email1", "password1");
 
         try {
-            RegisterResult register1 = userService.register(user1);
-            userService.createGame("gamename1", register1.authToken());
-            userService.createGame("gamename2", register1.authToken());
+            RegisterResult register1 = UserService.register(user1);
+            UserService.createGame("gamename1", register1.authToken());
+            UserService.createGame("gamename2", register1.authToken());
 
-            userService.clearAllData();
+            UserService.clearAllData();
 
             var user2 = new UserData("username1", "email1", "password1");
-            RegisterResult register2 = userService.register(user2);
-            assert(userService.listGames(register2.authToken()).isEmpty());
+            RegisterResult register2 = UserService.register(user2);
+            assert(UserService.listGames(register2.authToken()).isEmpty());
         } catch (AlreadyTakenException | UnauthorizedException | BadPasswordException | BadRequestException e) {}
     }
 
@@ -195,15 +195,15 @@ public class Phase3Tests {
         var user1 = new UserData("username1", "email1", "password1");
 
         try {
-            RegisterResult register1 = userService.register(user1);
-            userService.createGame("gamename1", register1.authToken());
-            userService.joinGame(1001, "WHITE", register1.authToken());
+            RegisterResult register1 = UserService.register(user1);
+            UserService.createGame("gamename1", register1.authToken());
+            UserService.joinGame(1001, "WHITE", register1.authToken());
 
             var user2 = new UserData("username1", "email1", "password1");
-            userService.register(user2);
+            UserService.register(user2);
 
             //get games (first game) should have username1 on white team
-            assert(memoryDataAccess.getGamesList().getFirst().whiteUsername().equals("username1"));
+            assert(MemoryDataAccess.getGamesList().getFirst().whiteUsername().equals("username1"));
         } catch (AlreadyTakenException | UnauthorizedException | DataAccessException | BadPasswordException | BadRequestException e) {}
     }
     @Test
@@ -213,14 +213,14 @@ public class Phase3Tests {
         var user1 = new UserData("username1", "email1", "password1");
 
         try {
-            RegisterResult register1 = userService.register(user1);
-            userService.createGame("gamename1", register1.authToken());
-            userService.joinGame(1001, "WHITE", register1.authToken());
+            RegisterResult register1 = UserService.register(user1);
+            UserService.createGame("gamename1", register1.authToken());
+            UserService.joinGame(1001, "WHITE", register1.authToken());
 
             var user2 = new UserData("username1", "email1", "password1");
-            RegisterResult register2 = userService.register(user2);
+            RegisterResult register2 = UserService.register(user2);
 
-            assertThrows(AlreadyTakenException.class, () -> userService.joinGame(1001, "WHITE", register2.authToken()));
+            assertThrows(AlreadyTakenException.class, () -> UserService.joinGame(1001, "WHITE", register2.authToken()));
 
         } catch (AlreadyTakenException | UnauthorizedException | DataAccessException | BadPasswordException | BadRequestException e) {}
     }
