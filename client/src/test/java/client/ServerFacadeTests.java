@@ -27,4 +27,11 @@ public class ServerFacadeTests {
         Assertions.assertTrue(true);
     }
 
+    @Test
+    void help() {
+//        facade.help();
+//        String result = //what comes out of help and how do i check for that
+//        assert help returned what i thought it would
+    }
+
 }
