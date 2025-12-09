@@ -10,6 +10,7 @@ import model.*;
 import dataaccess.DataAccessException;
 import org.mindrot.jbcrypt.BCrypt;
 import service.AlreadyTakenException;
+import service.UserService;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -28,8 +29,12 @@ public class MySqlDataAccess {
     private int gameID = 1000;
     private static final Gson gson = createSerializer();
 
-    public void MySqlDataAccess() throws DataAccessException {
-        configureDatabase();
+    public MySqlDataAccess() {
+        try {
+            configureDatabase();
+        } catch (DataAccessException e) {
+            System.out.println("ERROR: " + e.getMessage());
+        }
     }
 
     //add game serializer for ChessGame types
@@ -78,7 +83,24 @@ public class MySqlDataAccess {
         return authToken;
     }
 
-    public CreateResult createNewGame(String gamename) throws DataAccessException {
+    public CreateResult createNewGame(String gamename) throws DataAccessException, AlreadyTakenException {
+
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT gamename FROM games where gamename=?";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setString(1, gamename);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        throw new AlreadyTakenException("Error: name already in use");
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+        //go through and see if the name is already there
+        //if it iss, throw AlreadyTakenException
+
         gameID++;
         String json = gson.toJson(new ChessGame());
         var statement = "INSERT INTO games (gameID, whiteUsername, blackUsername, gamename, json) VALUES (?, ?, ?, ?, ?)";
@@ -89,13 +111,14 @@ public class MySqlDataAccess {
     }
 
     public void removeAuth(AuthData auth) throws DataAccessException {
-        var statement = "DELETE FROM auths WHERE auth=?";
-        executeUpdate(statement, auth);
+        var statement = "DELETE FROM auths WHERE authToken=?";
+
+        executeUpdate(statement, auth.authToken());
     }
 
     public UserData getUser(String username) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT username, json FROM users where username=?";
+            var statement = "SELECT username, password, email FROM users where username=?";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 ps.setString(1, username);
                 try (ResultSet rs = ps.executeQuery()) {
@@ -188,7 +211,12 @@ public class MySqlDataAccess {
         var blackUsername = rs.getString("blackUsername");
         var gamename = rs.getString("gamename");
         var json = rs.getString("json");
-        ChessGame game = gson.fromJson(json, ChessGame.class);
+        ChessGame game;
+        try {
+            game = gson.fromJson(json, ChessGame.class);
+        } catch (StackOverflowError e) {
+            throw new RuntimeException("DESERIALIZER ISSUE!!!!!!!!! ", e);
+        }
         return new GameData(gameID, whiteUsername, blackUsername, gamename, game);
     }
 

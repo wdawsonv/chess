@@ -1,6 +1,7 @@
 package service;
 
 import dataaccess.DataAccessException;
+import dataaccess.DatabaseManager;
 import dataaccess.MySqlDataAccess;
 import model.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,12 +17,18 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class Phase3Tests {
 
-    static final MySqlDataAccess MEMORY_DATA_ACCESS = new MySqlDataAccess();
+    static final MySqlDataAccess MEMORY_DATA_ACCESS;
+
+    static {
+            MEMORY_DATA_ACCESS = new MySqlDataAccess();
+    }
+
     static final UserService USER_SERVICE = new UserService(MEMORY_DATA_ACCESS);
 
 
     @BeforeEach
     void clearAll() throws DataAccessException {
+        DatabaseManager.createDatabase();
         USER_SERVICE.clearAllData();
     }
 

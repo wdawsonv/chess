@@ -20,7 +20,7 @@ public class Server {
     private final UserService service;
 
     public Server() {
-        this(new UserService(new MySqlDataAccess()));
+            this(new UserService(new MySqlDataAccess()));
     }
 
     public Server(UserService service) {

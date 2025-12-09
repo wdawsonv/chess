@@ -92,7 +92,7 @@ public class UserService {
         }
     }
 
-    private CreateResult createNewGame(String gameName) throws DataAccessException {
+    private CreateResult createNewGame(String gameName) throws DataAccessException, AlreadyTakenException {
         return mySqlDataAccess.createNewGame(gameName);
     }
 
