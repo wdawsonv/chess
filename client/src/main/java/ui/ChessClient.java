@@ -1,23 +1,49 @@
 package ui;
 
 import com.google.gson.Gson;
-import com.sun.nio.sctp.NotificationHandler;
 import exception.ResponseException;
 import model.LoginRequest;
 import model.UserData;
 import server.ServerFacade;
 
 import java.util.Arrays;
+import java.util.Scanner;
 
-public class PreLoginClient {
+import static java.awt.Color.*;
+import static ui.EscapeSequences.*;
+
+public class ChessClient {
+
     private String visitorName = null;
     private final ServerFacade server;
-    private final String serverUrl;
     private State state = State.PRELOGIN;
 
-    public PreLoginClient(String serverUrl) {
+
+    public ChessClient(String serverUrl) {
         server = new ServerFacade(serverUrl);
-        this.serverUrl = serverUrl;
+    }
+
+    public void run() {
+        System.out.println("♕♕♕♕♕♕ Welcome to chessland!!!!!, sign in to start");
+        System.out.print(help());
+
+        Scanner scanner = new Scanner(System.in);
+        var result = "";
+        while (!"quit".equals(result)) {
+            printPrompt();
+            String line = scanner.nextLine();
+
+            try {
+                result = eval(line);
+                if (result == null) {
+                    result = "";
+                }
+                System.out.print(BLUE + result);
+            } catch (Throwable e) {
+                System.out.print(e.toString());
+            }
+        }
+        System.out.println();
     }
 
     public String eval(String input) {
@@ -72,5 +98,9 @@ public class PreLoginClient {
                 quit - to exit the program
                 help - displays possible commands
                 """;
+    }
+
+    private void printPrompt() {
+        System.out.print("\n" + RESET + ">>>" + GREEN);
     }
 }

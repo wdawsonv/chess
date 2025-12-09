@@ -4,6 +4,7 @@ import dataaccess.DataAccessException;
 import dataaccess.DatabaseManager;
 import dataaccess.MemoryDataAccess;
 import dataaccess.MySqlDataAccess;
+import exception.ResponseException;
 import model.*;
 import org.junit.jupiter.api.*;
 import server.Server;
@@ -57,19 +58,21 @@ public class ServerFacadeTests {
 
     @Test
     void registerUserPositiveTest() throws Exception {
-        UserData user1 = new UserData("username1", "password1", "email1");
+        UserData user1 = new UserData("username13", "password1", "email1");
         RegisterResult result = facade.addUser(user1);
 
         System.out.println( "AAAAAAAH" + result);
-        Assertions.assertEquals("username1", result.username());
+        Assertions.assertEquals("username13", result.username());
         Assertions.assertNotNull(result.authToken());
     }
 
     @Test
     void registerUserNegativeTest() throws Exception {
-        UserData user1 = new UserData("username1", "password1", "email1");
+        UserData user1 = new UserData("username14", "password1", "email1");
         facade.addUser(user1);
-        Assertions.assertThrows(Exception.class, () -> facade.addUser(user1));
+        UserData user2 = new UserData("username12", "password", "email1");
+        facade.addUser(user2);
+        Assertions.assertThrows(NullPointerException.class, () -> facade.addUser(user1));
     }
 
 }

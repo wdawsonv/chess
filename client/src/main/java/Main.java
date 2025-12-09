@@ -1,5 +1,5 @@
 import chess.*;
-import ui.Repl;
+import ui.ChessClient;
 
 public class Main {
     public static void main(String[] args) {
@@ -9,7 +9,7 @@ public class Main {
         }
 
         try {
-            new Repl(serverUrl).run();
+            new ChessClient(serverUrl).run();
             var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
             System.out.println("♕ 240 Chess Client: " + piece);
         } catch (Throwable ex) {
