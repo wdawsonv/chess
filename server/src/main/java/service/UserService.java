@@ -1,7 +1,8 @@
 package service;
 
 import dataaccess.DataAccessException;
-import dataaccess.MemoryDataAccess;
+import dataaccess.mySqlDataAccess;
+import dataaccess.MySqlDataAccess;
 
 import io.javalin.http.UnauthorizedResponse;
 import model.*;
@@ -11,14 +12,16 @@ import java.util.List;
 
 public class UserService {
 
-    private final MemoryDataAccess memoryDataAccess;
+//    private final mySqlDataAccess mySqlDataAccess;
+    private final MySqlDataAccess mySqlDataAccess;
 
-    public UserService(MemoryDataAccess memoryDataAccess) {
-        this.memoryDataAccess = memoryDataAccess;
+    public UserService(MySqlDataAccess mySqlDataAccess) {
+        this.mySqlDataAccess = mySqlDataAccess;
+
     }
 
     public RegisterResult register(UserData user) throws DataAccessException, AlreadyTakenException, BadPasswordException {
-        if (memoryDataAccess.getUser(user.username()) == null) {
+        if (mySqlDataAccess.getUser(user.username()) == null) {
             if (user.password() == null) {
                 throw new BadPasswordException("must provide a password");
             }
@@ -38,7 +41,7 @@ public class UserService {
             throw new BadRequestException("no username/password provided");
         }
 
-        if (memoryDataAccess.getUser(user.username()) == null) {
+        if (mySqlDataAccess.getUser(user.username()) == null) {
             throw new MissingUsernameException("username not in database");
         } else {
             UserData actualUser = getUser(givenUsername);
@@ -90,45 +93,45 @@ public class UserService {
     }
 
     private CreateResult createNewGame(String gameName) throws AlreadyTakenException {
-        return memoryDataAccess.createNewGame(gameName);
+        return mySqlDataAccess.createNewGame(gameName);
     }
 
     public UserData createUser(UserData user) throws DataAccessException {
-        return memoryDataAccess.addUser(user);
+        return mySqlDataAccess.addUser(user);
     }
 
     private String createAuth(String username) throws DataAccessException {
-        return memoryDataAccess.addAuth(username);
+        return mySqlDataAccess.addAuth(username);
     }
 
-    public void deleteUsers() throws DataAccessException {
-        memoryDataAccess.deleteUsers();
-    }
+//    public void deleteUsers() throws DataAccessException {
+//        mySqlDataAccess.deleteUsers();
+//    }
 
     public List<UserData> listUsers() throws DataAccessException {
-        return memoryDataAccess.listUsers();
+        return mySqlDataAccess.listUsers();
     }
 
-    public UserData getUser(String username) {
-        return memoryDataAccess.getUser(username);
+    public UserData getUser(String username) throws DataAccessException {
+        return mySqlDataAccess.getUser(username);
     }
 
     private AuthData getAuth(String token) {
-        return memoryDataAccess.getAuth(token);
+        return mySqlDataAccess.getAuth(token);
     }
 
     private void removeAuth(AuthData authData) {
-        memoryDataAccess.removeAuth(authData);
+        mySqlDataAccess.removeAuth(authData);
     }
 
     private List<GameData> getGamesList() {
-        return memoryDataAccess.getGamesList();
+        return mySqlDataAccess.getGamesList();
     }
 
-    public void clearAllData() {
-        memoryDataAccess.clearUserData();
-        memoryDataAccess.clearGameData();
-        memoryDataAccess.clearAuthData();
+    public void clearAllData() throws DataAccessException {
+        mySqlDataAccess.clearUserData();
+        mySqlDataAccess.clearGameData();
+        mySqlDataAccess.clearAuthData();
     }
 
     public JoinResult joinGame(int gameID, String color, String authToken) throws UnauthorizedException, AlreadyTakenException, DataAccessException, BadRequestException {
@@ -136,7 +139,7 @@ public class UserService {
         if (getAuth(authToken) == null) {
             throw new UnauthorizedException("unauthorized");
         } else {
-            AuthData userAuthData = memoryDataAccess.getAuth(authToken);
+            AuthData userAuthData = mySqlDataAccess.getAuth(authToken);
             String username = userAuthData.username();
 
             return joinExistingGame(gameID, color, username);
@@ -144,6 +147,6 @@ public class UserService {
     }
 
     private JoinResult joinExistingGame(int gameID, String color, String username) throws AlreadyTakenException, DataAccessException, BadRequestException {
-        return memoryDataAccess.joinExistingGame(gameID, color, username);
+        return mySqlDataAccess.joinExistingGame(gameID, color, username);
     }
 }

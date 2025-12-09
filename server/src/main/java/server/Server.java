@@ -2,6 +2,7 @@ package server;
 
 import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
+import dataaccess.MySqlDataAccess;
 import io.javalin.*;
 import io.javalin.http.Context;
 import model.*;
@@ -18,7 +19,7 @@ public class Server {
     private final UserService service;
 
     public Server() {
-        this(new UserService(new MemoryDataAccess()));
+        this(new UserService(new MySqlDataAccess()));
     }
 
     public Server(UserService service) {
@@ -148,7 +149,7 @@ public class Server {
 
     }
 
-    private void clearAll(Context ctx) {
+    private void clearAll(Context ctx) throws DataAccessException {
         service.clearAllData();
         ctx.result("{}");
     }
