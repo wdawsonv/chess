@@ -1,9 +1,7 @@
 package dataaccess;
 
 import chess.*;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializer;
+import com.google.gson.*;
 import com.mysql.cj.protocol.Resultset;
 import com.mysql.cj.x.protobuf.MysqlxPrepare;
 import model.*;
@@ -27,7 +25,8 @@ public class MySqlDataAccess {
         return UUID.randomUUID().toString();
     }
     private int gameID = 1000;
-    private static final Gson gson = createSerializer();
+//    Gson gson = new Gson;
+//    private static final Gson gson = createSerializer();
 
     public MySqlDataAccess() {
         try {
@@ -38,29 +37,29 @@ public class MySqlDataAccess {
     }
 
     //add game serializer for ChessGame types
-    public static Gson createSerializer() {
-        GsonBuilder gsonBuilder = new GsonBuilder();
-
-        gsonBuilder.registerTypeAdapter(ChessPiece.class,
-                (JsonDeserializer<ChessPiece>) (el, type, ctx) -> {
-                    ChessPiece chessPiece = null;
-                    if (el.isJsonObject()) {
-                        String pieceType = el.getAsJsonObject().get("type").getAsString();
-                        chessPiece = ctx.deserialize(el, ChessPiece.class);
-//                        switch (ChessPiece.PieceType.valueOf(pieceType)) {
-//                            case PAWN -> chessPiece = ctx.deserialize(el, Pawn.class);
-//                            case ROOK -> chessPiece = ctx.deserialize(el, Rook.class);
-//                            case KNIGHT -> chessPiece = ctx.deserialize(el, Knight.class);
-//                            case BISHOP -> chessPiece = ctx.deserialize(el, Bishop.class);
-//                            case QUEEN -> chessPiece = ctx.deserialize(el, Queen.class);
-//                            case KING -> chessPiece = ctx.deserialize(el, King.class);
-//                        }
-                    }
-                    return chessPiece;
-                });
-
-        return gsonBuilder.create();
-    }
+//    public static Gson createSerializer() {
+//        GsonBuilder gsonBuilder = new GsonBuilder();
+//
+//        gsonBuilder.registerTypeAdapter(ChessPiece.class,
+//                (JsonDeserializer<ChessPiece>) (el, type, ctx) -> {
+//                    ChessPiece chessPiece = null;
+//                    if (el.isJsonObject()) {
+//                        String pieceType = el.getAsJsonObject().get("type").getAsString();
+//                        chessPiece = ctx.deserialize(el, ChessPiece.class);
+////                        switch (ChessPiece.PieceType.valueOf(pieceType)) {
+////                            case PAWN -> chessPiece = ctx.deserialize(el, Pawn.class);
+////                            case ROOK -> chessPiece = ctx.deserialize(el, Rook.class);
+////                            case KNIGHT -> chessPiece = ctx.deserialize(el, Knight.class);
+////                            case BISHOP -> chessPiece = ctx.deserialize(el, Bishop.class);
+////                            case QUEEN -> chessPiece = ctx.deserialize(el, Queen.class);
+////                            case KING -> chessPiece = ctx.deserialize(el, King.class);
+////                        }
+//                    }
+//                    return chessPiece;
+//                });
+//
+//        return gsonBuilder.create();
+//    }
 
     //add a user
     //will take in UserData type and return userData
@@ -102,7 +101,7 @@ public class MySqlDataAccess {
         //if it iss, throw AlreadyTakenException
 
         gameID++;
-        String json = gson.toJson(new ChessGame());
+        String json = new Gson().toJson(new ChessGame());
         var statement = "INSERT INTO games (gameID, whiteUsername, blackUsername, gamename, json) VALUES (?, ?, ?, ?, ?)";
 
         executeUpdate(statement, gameID, null, null, gamename, json);
@@ -210,13 +209,19 @@ public class MySqlDataAccess {
         var whiteUsername = rs.getString("whiteUsername");
         var blackUsername = rs.getString("blackUsername");
         var gamename = rs.getString("gamename");
+
+
+
         var json = rs.getString("json");
-        ChessGame game;
-        try {
-            game = gson.fromJson(json, ChessGame.class);
-        } catch (StackOverflowError e) {
-            throw new RuntimeException("DESERIALIZER ISSUE!!!!!!!!! ", e);
-        }
+        JsonObject obj = JsonParser.parseString(json).getAsJsonObject();
+        ChessBoard board = new Gson().fromJson(obj.get("gameBoard"), ChessBoard.class);
+        System.out.println("gameBoard ok");
+        ChessGame game = new ChessGame();
+//        try {
+//            game = gson.fromJson(json, ChessGame.class);
+//        } catch (StackOverflowError e) {
+//            throw new RuntimeException("DESERIALIZER ISSUE!!!!!!!!! ", e);
+//        }
         return new GameData(gameID, whiteUsername, blackUsername, gamename, game);
     }
 
