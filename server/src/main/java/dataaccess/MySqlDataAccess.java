@@ -273,7 +273,7 @@ public class MySqlDataAccess {
     public List<UserData> listUsers() throws DataAccessException, SQLException {
         var result = new ArrayList<UserData>();
         try (Connection conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT username, password, email FROM uesrs";
+            var statement = "SELECT username, password, email FROM users";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {

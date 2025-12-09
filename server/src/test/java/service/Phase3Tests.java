@@ -96,8 +96,6 @@ public class Phase3Tests {
 
             assert (MEMORY_DATA_ACCESS.getAuth(register1.authToken()) == null);
         } catch (AlreadyTakenException | UnauthorizedException | BadPasswordException e) {}
-
-
     }
 
     @Test
@@ -108,9 +106,8 @@ public class Phase3Tests {
             assertThrows(UnauthorizedException.class, () -> USER_SERVICE.logout("not an auth token :PPPPPP"));
 
         } catch (AlreadyTakenException | BadPasswordException e) {}
-
-
     }
+
     @Test
     void loginPositiveTest() throws DataAccessException {
         var user1 = new UserData("username1", "email1", "password1");
