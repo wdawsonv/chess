@@ -8,6 +8,7 @@ import model.*;
 import dataaccess.DataAccessException;
 import org.mindrot.jbcrypt.BCrypt;
 import service.AlreadyTakenException;
+import service.BadRequestException;
 import service.UserService;
 
 import java.sql.*;
@@ -139,12 +140,13 @@ public class MySqlDataAccess {
         return new UserData(username, password, email);
     }
 
-    public JoinResult joinExistingGame(int gameID, String color, String username) throws DataAccessException {
-        //check to see if the name is free
+    public JoinResult joinExistingGame(int gameID, String color, String username) throws DataAccessException, AlreadyTakenException, BadRequestException {
+        //check and make sure the gameID is there
+
         try (Connection conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT whiteUsername FROM games where gameID=?";
+            var statement = "SELECT whiteUsername, blackUsername FROM games where gameID=?";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
-                ps.setInt(1, gameID); //what is this line doing?
+                ps.setInt(1, gameID);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
                         boolean isEmptyWhite = isNullWhite(rs);
@@ -152,14 +154,18 @@ public class MySqlDataAccess {
 
                         if (color.equals("WHITE") && isEmptyWhite || color.equals("BLACK") && isEmptyBlack) {
                             return addUserToColor(gameID, color, username);
+                        } else if (!isEmptyWhite || !isEmptyBlack) {
+                            throw new AlreadyTakenException("someone already there");
                         } else {
-                            throw new AlreadyTakenException("someone already there/bad color");
+                            throw new BadRequestException("bad color");
                         }
                     }
                 }
             }
-        } catch (Exception e) { //maybe separate this out so it's not
+        } catch (DataAccessException | SQLException e) { //maybe separate this out so it's not
             throw new DataAccessException(e.getMessage());
+        } catch (AlreadyTakenException e) {
+            throw new AlreadyTakenException(e.getMessage());
         }
         return null;
     }
@@ -167,10 +173,10 @@ public class MySqlDataAccess {
     private JoinResult addUserToColor(int gameID, String color, String username) throws DataAccessException, SQLException {
         try (Connection conn = DatabaseManager.getConnection()) {
             if (color.equals("WHITE")) {
-                String statement = "UPDATE games SET whiteUsername=? WHERE gameID=?";
+                var statement = "UPDATE games SET whiteUsername=? WHERE gameID=?";
                 executeUpdate(statement, username, gameID);
             } else {
-                String statement = "UPDATE games SET blackUsername=? WHERE gameID=?";
+                var statement = "UPDATE games SET blackUsername=? WHERE gameID=?";
                 executeUpdate(statement, username, gameID);
             }
             return new JoinResult();

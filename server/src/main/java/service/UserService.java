@@ -5,6 +5,7 @@ import dataaccess.MySqlDataAccess;
 
 import io.javalin.http.UnauthorizedResponse;
 import model.*;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -47,7 +48,7 @@ public class UserService {
             UserData actualUser = getUser(givenUsername);
             String actualPassword = actualUser.password();
 
-            if (givenPassword.equals(actualPassword)) {
+            if (BCrypt.checkpw(givenPassword, actualPassword)) {
                 String authToken = createAuth(givenUsername);
                 return new LoginResult(givenUsername, authToken);
             } else {
@@ -138,6 +139,8 @@ public class UserService {
 
         if (getAuth(authToken) == null) {
             throw new UnauthorizedException("unauthorized");
+        } else if (gameID == 0 || color == null) {
+            throw new BadRequestException("you need a gameID in there zlawg");
         } else {
             AuthData userAuthData = mySqlDataAccess.getAuth(authToken);
             String username = userAuthData.username();
