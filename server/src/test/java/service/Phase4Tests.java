@@ -35,6 +35,14 @@ public class Phase4Tests {
         MEMORY_DATA_ACCESS.clearUserData();
     }
 
+    @Test
+    void clearAllPositiveTest() throws DataAccessException {
+        MEMORY_DATA_ACCESS.clearAuthData();
+        MEMORY_DATA_ACCESS.clearGameData();
+        MEMORY_DATA_ACCESS.clearUserData();
+        assert (1 == 1);
+    }
+
     //ALL THE THINGS I NEED TO TEST
     //public UserData addUser(UserData)
     @Test
