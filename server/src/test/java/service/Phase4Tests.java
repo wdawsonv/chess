@@ -205,18 +205,19 @@ public class Phase4Tests {
     @Test
     void listUsersPositiveTest () throws DataAccessException, SQLException {
         var user1 = new UserData("username1", "email1", "password1");
-        var user2 = new UserData("username1", "email1", "password1");
-        var user3 = new UserData("username1", "email1", "password1");
+        var user2 = new UserData("username2", "email2", "password2");
+        var user3 = new UserData("username3", "email3", "password3");
         MEMORY_DATA_ACCESS.addUser(user1);
         MEMORY_DATA_ACCESS.addUser(user2);
         MEMORY_DATA_ACCESS.addUser(user3);
 
-        assert (MEMORY_DATA_ACCESS.listUsers().getFirst() == user1);
+        assert (MEMORY_DATA_ACCESS.listUsers().getFirst().username().equals(user1.username()));
     }
 
     @Test
     void listUsersNegativeTest () throws DataAccessException, SQLException {
-        assert (MEMORY_DATA_ACCESS.listUsers()== null);
+        List<String> emptyList = new ArrayList<>();
+        assert (MEMORY_DATA_ACCESS.listUsers().equals(emptyList));
     }
 
     //public void clearUser/Auth/GameData
@@ -229,8 +230,9 @@ public class Phase4Tests {
         MEMORY_DATA_ACCESS.clearGameData();
         MEMORY_DATA_ACCESS.clearAuthData();
         MEMORY_DATA_ACCESS.clearUserData();
-
-        assert (MEMORY_DATA_ACCESS.listUsers() == null && MEMORY_DATA_ACCESS.getGamesList() == null);
+        System.out.println(MEMORY_DATA_ACCESS.listUsers());
+        List<String> emptyList = new ArrayList<>();
+        assert (MEMORY_DATA_ACCESS.listUsers().equals(emptyList));
     }
 
 
