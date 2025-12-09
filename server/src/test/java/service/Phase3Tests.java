@@ -164,7 +164,8 @@ public class Phase3Tests {
             USER_SERVICE.createGame("gamename2", register1.authToken());
 
             assert(USER_SERVICE.listGames(register1.authToken()).size() == 2);
-        } catch (AlreadyTakenException | UnauthorizedException | BadPasswordException | BadRequestException e) {}
+        } catch (AlreadyTakenException | UnauthorizedException | BadPasswordException | BadRequestException |
+                 SQLException e) {}
     }
 
     @Test
@@ -193,7 +194,8 @@ public class Phase3Tests {
             var user2 = new UserData("username1", "email1", "password1");
             RegisterResult register2 = USER_SERVICE.register(user2);
             assert(USER_SERVICE.listGames(register2.authToken()).isEmpty());
-        } catch (AlreadyTakenException | UnauthorizedException | BadPasswordException | BadRequestException e) {}
+        } catch (AlreadyTakenException | UnauthorizedException | BadPasswordException | BadRequestException |
+                 SQLException e) {}
     }
 
     @Test
@@ -211,7 +213,7 @@ public class Phase3Tests {
 
             //get games (first game) should have username1 on white team
             assert(MEMORY_DATA_ACCESS.getGamesList().getFirst().whiteUsername().equals("username1"));
-        } catch (AlreadyTakenException | UnauthorizedException | DataAccessException | BadPasswordException | BadRequestException e) {}
+        } catch (AlreadyTakenException | UnauthorizedException | DataAccessException | BadPasswordException | BadRequestException | SQLException e) {}
     }
     @Test
     void addUserWhiteNegativeTest() {

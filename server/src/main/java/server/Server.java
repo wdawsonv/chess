@@ -9,6 +9,7 @@ import model.*;
 import com.google.gson.Gson;
 import service.*;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -105,6 +106,9 @@ public class Server {
         } catch (UnauthorizedException e) {
             ctx.status(401);
             ctx.json("{ \"message\": \"Error: " + e.getMessage() + "\" }");
+        } catch (SQLException e) {
+            ctx.status(500);
+            ctx.json("error: placeholder: " + e.getMessage());
         }
     }
 

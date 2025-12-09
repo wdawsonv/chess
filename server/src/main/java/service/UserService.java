@@ -1,7 +1,6 @@
 package service;
 
 import dataaccess.DataAccessException;
-import dataaccess.mySqlDataAccess;
 import dataaccess.MySqlDataAccess;
 
 import io.javalin.http.UnauthorizedResponse;
@@ -71,7 +70,7 @@ public class UserService {
 
     }
 
-    public List<GameData> listGames(String token) throws UnauthorizedException, DataAccessException {
+    public List<GameData> listGames(String token) throws UnauthorizedException, DataAccessException, SQLException {
 
         if (getAuth(token) == null) {
             throw new UnauthorizedException("unauthorized");
@@ -93,7 +92,7 @@ public class UserService {
         }
     }
 
-    private CreateResult createNewGame(String gameName) throws AlreadyTakenException {
+    private CreateResult createNewGame(String gameName) throws DataAccessException {
         return mySqlDataAccess.createNewGame(gameName);
     }
 
@@ -125,7 +124,7 @@ public class UserService {
         mySqlDataAccess.removeAuth(authData);
     }
 
-    private List<GameData> getGamesList() {
+    private List<GameData> getGamesList() throws DataAccessException, SQLException {
         return mySqlDataAccess.getGamesList();
     }
 

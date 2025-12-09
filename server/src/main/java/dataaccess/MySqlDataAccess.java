@@ -1,11 +1,15 @@
 package dataaccess;
 
+import chess.*;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializer;
 import com.mysql.cj.protocol.Resultset;
 import com.mysql.cj.x.protobuf.MysqlxPrepare;
 import model.*;
 import dataaccess.DataAccessException;
 import org.mindrot.jbcrypt.BCrypt;
+import service.AlreadyTakenException;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -20,11 +24,37 @@ public class MySqlDataAccess {
     private static String generateToken() {
         return UUID.randomUUID().toString();
     }
+    private int gameID = 1000;
+    private static final Gson gson = createSerializer();
 
     public void MySqlDataAccess() throws DataAccessException {
         configureDatabase();
     }
 
+    //add game serializer for ChessGame types
+    public static Gson createSerializer() {
+        GsonBuilder gsonBuilder = new GsonBuilder();
+
+        gsonBuilder.registerTypeAdapter(ChessPiece.class,
+                (JsonDeserializer<ChessPiece>) (el, type, ctx) -> {
+                    ChessPiece chessPiece = null;
+                    if (el.isJsonObject()) {
+                        String pieceType = el.getAsJsonObject().get("type").getAsString();
+                        chessPiece = ctx.deserialize(el, ChessPiece.class);
+//                        switch (ChessPiece.PieceType.valueOf(pieceType)) {
+//                            case PAWN -> chessPiece = ctx.deserialize(el, Pawn.class);
+//                            case ROOK -> chessPiece = ctx.deserialize(el, Rook.class);
+//                            case KNIGHT -> chessPiece = ctx.deserialize(el, Knight.class);
+//                            case BISHOP -> chessPiece = ctx.deserialize(el, Bishop.class);
+//                            case QUEEN -> chessPiece = ctx.deserialize(el, Queen.class);
+//                            case KING -> chessPiece = ctx.deserialize(el, King.class);
+//                        }
+                    }
+                    return chessPiece;
+                });
+
+        return gsonBuilder.create();
+    }
 
     //add a user
     //will take in UserData type and return userData
@@ -47,9 +77,19 @@ public class MySqlDataAccess {
         return authToken;
     }
 
+    public CreateResult createNewGame(String gamename) throws DataAccessException {
+        gameID++;
+        String json = gson.toJson(new ChessGame());
+        var statement = "INSERT INTO games (gameID, whiteUsername, blackUsername, gamename, json) VALUES (?, ?, ?, ?, ?)";
+
+        executeUpdate(statement, gameID, null, null, gamename, json);
+
+        return new CreateResult(gameID);
+    }
+
     public void removeAuth(AuthData auth) throws DataAccessException {
-        var statement = "DELETE FROM auths WEHRE auth=?";
-        executeUpdate(statement);
+        var statement = "DELETE FROM auths WHERE auth=?";
+        executeUpdate(statement, auth);
     }
 
     public UserData getUser(String username) throws DataAccessException {
@@ -74,6 +114,81 @@ public class MySqlDataAccess {
         var password = rs.getString("password");
         var email = rs.getString("email");
         return new UserData(username, password, email);
+    }
+
+    public JoinResult joinExistingGame(int gameID, String color, String username) throws DataAccessException {
+        //check to see if the name is free
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT whiteUsername FROM games where gameID=?";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setInt(1, gameID); //what is this line doing?
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        boolean isEmptyWhite = isNullWhite(rs);
+                        boolean isEmptyBlack = isNullBlack(rs);
+
+                        if (color.equals("WHITE") && isEmptyWhite || color.equals("BLACK") && isEmptyBlack) {
+                            return addUserToColor(gameID, color, username);
+                        } else {
+                            throw new AlreadyTakenException("someone already there/bad color");
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) { //maybe separate this out so it's not
+            throw new DataAccessException(e.getMessage());
+        }
+        return null;
+    }
+
+    private JoinResult addUserToColor(int gameID, String color, String username) throws DataAccessException, SQLException {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            if (color.equals("WHITE")) {
+                String statement = "UPDATE games SET whiteUsername=? WHERE gameID=?";
+                executeUpdate(statement, username, gameID);
+            } else {
+                String statement = "UPDATE games SET blackUsername=? WHERE gameID=?";
+                executeUpdate(statement, username, gameID);
+            }
+            return new JoinResult();
+        }
+    }
+
+    private boolean isNullWhite(ResultSet rs) throws SQLException {
+        var whiteUsername = rs.getString("whiteUsername");
+        return (whiteUsername == null);
+    }
+
+    private boolean isNullBlack(ResultSet rs) throws SQLException {
+        var blackUsername = rs.getString("blackUsername");
+        return (blackUsername == null);
+    }
+
+    public List<GameData> getGamesList() throws DataAccessException, SQLException {
+        var result = new ArrayList<GameData>();
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT gameID, whiteUsername, blackUsername, gamename, json FROM games";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        result.add(readGame(rs));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new DataAccessException("error: " + e.getMessage());
+        }
+        return result;
+    }
+
+    private GameData readGame(ResultSet rs) throws SQLException {
+        var gameID = rs.getInt("gameID");
+        var whiteUsername = rs.getString("whiteUsername");
+        var blackUsername = rs.getString("blackUsername");
+        var gamename = rs.getString("gamename");
+        var json = rs.getString("json");
+        ChessGame game = gson.fromJson(json, ChessGame.class);
+        return new GameData(gameID, whiteUsername, blackUsername, gamename, game);
     }
 
     public AuthData getAuth(String token) throws DataAccessException {
@@ -111,7 +226,7 @@ public class MySqlDataAccess {
     }
 
     public void clearGameData() throws DataAccessException {
-        var statement = "TRUNCATE users";
+        var statement = "TRUNCATE games";
         executeUpdate(statement);
     }
 
@@ -207,10 +322,11 @@ public class MySqlDataAccess {
                 `whiteUsername` varchar(256),
                 `blackUsername` varchar(256),
                 `gameName` varchar(256) NOT NULL,
+                `json` TEXT NOT NULL,
                 PRIMARY KEY (`gameID`),
                 INDEX(`gameName`)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
-            """
+            """ //implement the acutal game as just json the way petshop does :PPPPPPPP
     };
 
     private void configureDatabase() throws DataAccessException {
