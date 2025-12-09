@@ -58,10 +58,14 @@ public class Server {
         } catch (AlreadyTakenException e) {
             ctx.status(403);
             ctx.json("{ \"message\": \"Error: " + e.getMessage() + "\" }");
-        } catch (DataAccessException | BadPasswordException e) {
+        } catch (BadPasswordException e) {
             ctx.status(400);
             ctx.json("{ \"message\": \"Error: " + e.getMessage() + "\" }");
 //            ctx.result(new Gson().toJson("Error: " + e.getMessage()));
+        } catch (DataAccessException e) {
+            ctx.status(500);
+            ctx.json("{ \"message\": \"Error: " + e.getMessage() + "\" }");
+
         }
     }
 
@@ -74,13 +78,16 @@ public class Server {
         } catch (BadPasswordException | MissingUsernameException e) {
             ctx.status(401);
             ctx.json("{ \"message\": \"Error: " + e.getMessage() + "\" }");
-        } catch (DataAccessException | BadRequestException e) {
+        } catch (BadRequestException e) {
             ctx.status(400);
+            ctx.json("{ \"message\": \"Error: " + e.getMessage() + "\" }");
+        } catch (DataAccessException e) {
+            ctx.status(500);
             ctx.json("{ \"message\": \"Error: " + e.getMessage() + "\" }");
         }
     }
 
-    private void logout(Context ctx) throws DataAccessException {
+    private void logout(Context ctx) {
         String token = ctx.header("authorization");
 
         try {
@@ -90,10 +97,14 @@ public class Server {
         } catch (UnauthorizedException e) {
             ctx.status(401);
             ctx.json("{ \"message\": \"Error: " + e.getMessage() + "\" }");
+        } catch (DataAccessException e) {
+            ctx.status(500);
+            ctx.json("{ \"message\": \"Error: " + e.getMessage() + "\" }");
+
         }
     }
 
-    private void listGames(Context ctx) throws DataAccessException {
+    private void listGames(Context ctx) {
         String token = ctx.header("authorization");
 
         try {
@@ -109,10 +120,14 @@ public class Server {
         } catch (SQLException e) {
             ctx.status(500);
             ctx.json("error: placeholder: " + e.getMessage());
+        } catch (DataAccessException e) {
+            ctx.status(500);
+            ctx.json("{ \"message\": \"Error: " + e.getMessage() + "\" }");
+
         }
     }
 
-    private void createGame(Context ctx) throws DataAccessException {
+    private void createGame(Context ctx) {
         CreateRequest request = new Gson().fromJson(ctx.body(), CreateRequest.class);
         String gameName = request.gameName();
         String token = ctx.header("authorization");
@@ -127,6 +142,10 @@ public class Server {
         } catch (AlreadyTakenException | BadRequestException e) {
             ctx.status(400);
             ctx.json("{ \"message\": \"Error: " + e.getMessage() + "\" }");
+        } catch (DataAccessException e) {
+            ctx.status(500);
+            ctx.json("{ \"message\": \"Error: " + e.getMessage() + "\" }");
+
         }
     }
 
@@ -146,16 +165,25 @@ public class Server {
         } catch (AlreadyTakenException e) {
             ctx.status(403);
             ctx.json("{ \"message\": \"Error: " + e.getMessage() + "\" }");
-        } catch (DataAccessException | BadRequestException e) {
+        } catch (BadRequestException e) {
             ctx.status(400);
             ctx.json("{ \"message\": \"Error: " + e.getMessage() + "\" }");
+        } catch (DataAccessException e) {
+            ctx.status(500);
+            ctx.json("{ \"message\": \"Error: " + e.getMessage() + "\" }");
+
         }
 
     }
 
-    private void clearAll(Context ctx) throws DataAccessException {
-        service.clearAllData();
-        ctx.result("{}");
+    private void clearAll(Context ctx) {
+        try {
+            service.clearAllData();
+            ctx.result("{}");
+        } catch (DataAccessException e) {
+            ctx.status(500);
+            ctx.json("{ \"message\": \"Error: " + e.getMessage() + "\" }");
+        }
     }
 
 
