@@ -3,12 +3,13 @@ package ui;
 import java.util.Scanner;
 
 import static java.awt.Color.*;
+import static ui.EscapeSequences.*;
 
 public class Repl {
-    private final ChessClient client;
+    private final PreLoginClient client;
 
     public Repl(String serverUrl) {
-        client = new PreLoginClient(serverUrl, this);
+        client = new PreLoginClient(serverUrl);
         //how can I use State to swap between the clients?
     }
 
@@ -18,12 +19,15 @@ public class Repl {
 
         Scanner scanner = new Scanner(System.in);
         var result = "";
-        while (!result.equals("quit")) {
+        while (!"quit".equals(result)) {
             printPrompt();
             String line = scanner.nextLine();
 
             try {
                 result = client.eval(line);
+                if (result == null) {
+                    result = "";
+                }
                 System.out.print(BLUE + result);
             } catch (Throwable e) {
                 System.out.print(e.toString());
@@ -32,8 +36,7 @@ public class Repl {
         System.out.println();
     }
 
-    public void notify(Notification notification) {
-        System.out.println(RED + notification.message());
-        printPrompt();
+    private void printPrompt() {
+        System.out.print("\n" + RESET + ">>>" + GREEN);
     }
 }

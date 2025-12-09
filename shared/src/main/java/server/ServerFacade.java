@@ -1,6 +1,7 @@
 package server;
 
 import com.google.gson.Gson;
+import exception.ResponseException;
 import model.*;
 
 import java.net.URI;
@@ -19,13 +20,17 @@ public class ServerFacade {
         serverUrl = url;
     }
 
-    public UserData addUser(UserData user) throws Exception {
+    public RegisterResult addUser(UserData user) throws ResponseException {
         var request = buildRequest("POST", "/user", user);
         var response = sendRequest(request);
-        return handleResponse(response, UserData.class);
+        return handleResponse(response, RegisterResult.class);
     }
 
-
+    public LoginResult login(LoginRequest login) throws ResponseException {
+        var request = buildRequest("POST", "/session", login);
+        var response = sendRequest(request);
+        return handleResponse(response, LoginResult.class);
+    }
 
     private HttpRequest buildRequest(String method, String path, Object body) {
         var request = HttpRequest.newBuilder()
@@ -46,25 +51,26 @@ public class ServerFacade {
         }
     }
 
-    private HttpResponse<String> sendRequest(HttpRequest request) throws Exception {
+    private HttpResponse<String> sendRequest(HttpRequest request) throws ResponseException {
         try {
             return client.send(request, BodyHandlers.ofString());
         } catch (Exception ex) {
-            throw new Exception("if you want more info go look at ServerFacade.java and how to implement ResponseException" + ex.getMessage());
+            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
         }
     }
 
-    private <T> T handleResponse(HttpResponse<String> response, Class<T> responseClass) throws Exception {
+    private <T> T handleResponse(HttpResponse<String> response, Class<T> responseClass) throws ResponseException {
         var status = response.statusCode();
+
+        System.out.println("RAW RESPONSE: " + response.body());
         if (!isSuccessful(status)) {
             var body = response.body();
             if (body != null) {
-                throw new Exception();
+                throw ResponseException.fromJson(body);
             }
 
-            throw new Exception("if you want more info go look at ServerFacade.java and how to implement ResponseException");
+            throw new ResponseException(ResponseException.fromHttpStatusCode(status), "other failure: " + status);
         }
-
         if (responseClass != null) {
             return new Gson().fromJson(response.body(), responseClass);
         }
