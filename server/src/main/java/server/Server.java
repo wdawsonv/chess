@@ -79,7 +79,7 @@ public class Server {
         }
     }
 
-    private void logout(Context ctx) {
+    private void logout(Context ctx) throws DataAccessException {
         String token = ctx.header("authorization");
 
         try {
@@ -92,7 +92,7 @@ public class Server {
         }
     }
 
-    private void listGames(Context ctx) {
+    private void listGames(Context ctx) throws DataAccessException {
         String token = ctx.header("authorization");
 
         try {
@@ -108,7 +108,7 @@ public class Server {
         }
     }
 
-    private void createGame(Context ctx) {
+    private void createGame(Context ctx) throws DataAccessException {
         CreateRequest request = new Gson().fromJson(ctx.body(), CreateRequest.class);
         String gameName = request.gameName();
         String token = ctx.header("authorization");

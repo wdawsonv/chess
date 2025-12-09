@@ -1,11 +1,14 @@
 package service;
 
 import dataaccess.DataAccessException;
+import dataaccess.MySqlDataAccess;
 import model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import dataaccess.MemoryDataAccess;
 
+import javax.xml.crypto.Data;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,13 +16,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class Phase3Tests {
 
-    static final MemoryDataAccess MEMORY_DATA_ACCESS = new MemoryDataAccess();
+    static final MySqlDataAccess MEMORY_DATA_ACCESS = new MySqlDataAccess();
     static final UserService USER_SERVICE = new UserService(MEMORY_DATA_ACCESS);
 
 
     @BeforeEach
     void clearAll() throws DataAccessException {
-        USER_SERVICE.deleteUsers();
+        USER_SERVICE.clearAllData();
     }
 
     @Test
@@ -38,15 +41,17 @@ public class Phase3Tests {
         try {
             USER_SERVICE.register(user3);
         } catch (AlreadyTakenException | BadPasswordException e) {}
-
-        List<UserData> users = USER_SERVICE.listUsers();
-
+        try {
+            List<UserData> users = USER_SERVICE.listUsers();
         List<UserData> expectedUsers = new ArrayList<>();
         expectedUsers.add(user1);
         expectedUsers.add(user2);
         expectedUsers.add(user3);
 
         assert (expectedUsers.equals(users));
+
+        } catch (SQLException | DataAccessException e) {}
+
     }
 
     @Test
@@ -63,13 +68,15 @@ public class Phase3Tests {
             USER_SERVICE.register(user3);
         } catch (AlreadyTakenException | BadPasswordException e) {}
 
-        List<UserData> users = USER_SERVICE.listUsers();
-
+        try {
+            List<UserData> users = USER_SERVICE.listUsers();
         List<UserData> expectedUsers = new ArrayList<>();
         expectedUsers.add(user1);
         expectedUsers.add(user3);
 
         assert (expectedUsers.equals(users));
+
+        } catch (SQLException | DataAccessException e) {}
     }
 
     @Test

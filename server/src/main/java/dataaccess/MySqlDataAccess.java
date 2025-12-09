@@ -1,11 +1,15 @@
 package dataaccess;
 
 import com.google.gson.Gson;
+import com.mysql.cj.protocol.Resultset;
+import com.mysql.cj.x.protobuf.MysqlxPrepare;
 import model.*;
 import dataaccess.DataAccessException;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
@@ -41,8 +45,11 @@ public class MySqlDataAccess {
         executeUpdate(statement, username, authToken);
 
         return authToken;
+    }
 
-
+    public void removeAuth(AuthData auth) throws DataAccessException {
+        var statement = "DELETE FROM auths WEHRE auth=?";
+        executeUpdate(statement);
     }
 
     public UserData getUser(String username) throws DataAccessException {
@@ -69,6 +76,30 @@ public class MySqlDataAccess {
         return new UserData(username, password, email);
     }
 
+    public AuthData getAuth(String token) throws DataAccessException {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT authToken, username FROM auths where authToken=?";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setString(1, token);
+                try (ResultSet rs = ps.executeQuery())  {
+                    if (rs.next()) {
+                        return readAuth(rs);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new DataAccessException(e.getMessage());
+        }
+        return null;
+    }
+
+    //what is a resultset?
+    private AuthData readAuth(ResultSet rs) throws SQLException {
+        var authToken = rs.getString("authToken");
+        var username = rs.getString("username");
+        return new AuthData(authToken, username);
+    }
+
     public void clearUserData() throws DataAccessException {
         var statement = "TRUNCATE users";
         executeUpdate(statement);
@@ -83,6 +114,25 @@ public class MySqlDataAccess {
         var statement = "TRUNCATE users";
         executeUpdate(statement);
     }
+
+    public List<UserData> listUsers() throws DataAccessException, SQLException {
+        var result = new ArrayList<UserData>();
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT username, password, email FROM uesrs";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        result.add(readUser(rs));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new DataAccessException("error: " + e.getMessage());
+        }
+        return result;
+    }
+
+
 
 
 

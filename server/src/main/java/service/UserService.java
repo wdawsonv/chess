@@ -7,6 +7,7 @@ import dataaccess.MySqlDataAccess;
 import io.javalin.http.UnauthorizedResponse;
 import model.*;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 
@@ -56,7 +57,7 @@ public class UserService {
         }
     }
 
-    public LogoutResult logout(String token) throws UnauthorizedException {
+    public LogoutResult logout(String token) throws UnauthorizedException, DataAccessException {
 
         if (getAuth(token) == null) {
             throw new UnauthorizedException("unauthorized");
@@ -70,7 +71,7 @@ public class UserService {
 
     }
 
-    public List<GameData> listGames(String token) throws UnauthorizedException {
+    public List<GameData> listGames(String token) throws UnauthorizedException, DataAccessException {
 
         if (getAuth(token) == null) {
             throw new UnauthorizedException("unauthorized");
@@ -80,7 +81,7 @@ public class UserService {
         }
     }
 
-    public CreateResult createGame(String gameName, String token) throws UnauthorizedException, AlreadyTakenException, BadRequestException {
+    public CreateResult createGame(String gameName, String token) throws UnauthorizedException, AlreadyTakenException, BadRequestException, DataAccessException {
 
         if (gameName == null) {
             throw new BadRequestException("no gamename included");
@@ -108,7 +109,7 @@ public class UserService {
 //        mySqlDataAccess.deleteUsers();
 //    }
 
-    public List<UserData> listUsers() throws DataAccessException {
+    public List<UserData> listUsers() throws DataAccessException, SQLException {
         return mySqlDataAccess.listUsers();
     }
 
@@ -116,11 +117,11 @@ public class UserService {
         return mySqlDataAccess.getUser(username);
     }
 
-    private AuthData getAuth(String token) {
+    private AuthData getAuth(String token) throws DataAccessException {
         return mySqlDataAccess.getAuth(token);
     }
 
-    private void removeAuth(AuthData authData) {
+    private void removeAuth(AuthData authData) throws DataAccessException {
         mySqlDataAccess.removeAuth(authData);
     }
 
