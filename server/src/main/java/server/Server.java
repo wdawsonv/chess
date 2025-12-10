@@ -2,6 +2,7 @@ package server;
 
 import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
+import server.websocket.WebSocketHandler;
 import dataaccess.MySqlDataAccess;
 import io.javalin.*;
 import io.javalin.http.Context;
@@ -34,7 +35,12 @@ public class Server {
                 .get("/game", this::listGames)
                 .post("/game", this::createGame)
                 .put("/game", this::joinGame)
-                .delete("/db", this::clearAll);
+                .delete("/db", this::clearAll)
+                .ws("/ws", ws -> {
+                    ws.onConnect(webSocketHandler);
+                    ws.onMessage(webSocketHandler);
+                    ws.onClose(webSocketHandler);
+                });
 
         // Register your endpoints and exception handlers here.
 
