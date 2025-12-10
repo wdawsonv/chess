@@ -76,20 +76,39 @@ public class ServerFacadeTests {
     @Test
     void logoutPositiveTest() throws Exception {
         String[] params = new String[]{"username14", "password1", "email1"};
-        String result = client.register(params);
+        client.register(params);
+        String result = client.logout();
 
-        assertEquals("Successfully logged out!", result);
+        assertEquals("Successfully logged you out", result);
     }
 
     @Test
     void logoutNegativeTest() throws Exception {
         String result = client.logout();
-        assertEquals("""
-                    register <USERNAME> <PASSWORD> <EMAIL> - to create an account
-                    login <USERNAME> <PASSWORD> - to play chess
-                    quit - to exit the program
-                    help - displays possible commands
-                    """, result);
+        assertEquals("Successfully logged you out", result);
+        //this one is the same as ServerFacadeTests bypass the State thingy
+    }
+
+    @Test
+    void loginPositiveTest() throws Exception {
+        String[] params = new String[]{"username14", "password1", "email1"};
+        client.register(params);
+        client.logout();
+        String result = client.login("username14", "password1");
+        assertEquals("Successfully logged in as username14", result);
+
+    }
+
+    @Test
+    void loginNegativeTest1() throws Exception {
+        String result = client.login("username14", "password1");
+        assertEquals("Invalid username/password", result);
+
+    }
+
+    @Test
+    void loginNegativeTest2() throws Exception {
+        Assertions.assertThrows(ResponseException.class, () -> client.login("onlyUsername"));
     }
 
 }

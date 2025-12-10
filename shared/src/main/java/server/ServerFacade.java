@@ -32,11 +32,15 @@ public class ServerFacade {
         return handleResponse(response, LoginResult.class);
     }
 
-    public LogoutResult logout() throws ResponseException {
-        var request = buildRequest("DELETE", "/session", null);
+    public void logout() throws ResponseException {
+        var request = buildRequest("DELETE", "/session", "");
         var response = sendRequest(request);
-        return handleResponse(response, LogoutResult.class);
+        //this may log everyone out accidentally
     }
+
+//    public List<GameData> listGames() {
+//
+//    }
 
     private HttpRequest buildRequest(String method, String path, Object body) {
         var request = HttpRequest.newBuilder()
