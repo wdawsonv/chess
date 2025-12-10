@@ -14,13 +14,12 @@ import static ui.EscapeSequences.*;
 
 public class ChessClient {
 
-    private String visitorName = null;
-    private final ServerFacade server;
+    private final ServerFacade facade;
     private State state = State.PRELOGIN;
-
+    private String authToken = null;
 
     public ChessClient(String serverUrl) {
-        server = new ServerFacade(serverUrl);
+        facade = new ServerFacade(serverUrl);
     }
 
     public void run() {
@@ -51,10 +50,18 @@ public class ChessClient {
             var tokens = input.toLowerCase().split(" ");
             var cmd = (tokens.length > 0) ? tokens[0] : "help";
             var params = Arrays.copyOfRange(tokens, 1, tokens.length);
-            return switch (cmd) {
-                case "register" -> register(params);
-                default -> help();
-            };
+            if (state == State.PRELOGIN) {
+                return switch (cmd) {
+                    case "register" -> register(params);
+                    case "login" -> login(params);
+                    case "quit" -> "quit";
+                    default -> help();
+                };
+            } else /*if (state == State.POSTLOGIN)*/ {
+                return switch (cmd) {
+                    default -> help();
+                };
+            }
         } catch (ResponseException ex) {
             return ex.getMessage();
         }
@@ -65,15 +72,17 @@ public class ChessClient {
             String username = params[0];
             String password = params[1];
             String email = params[2];
-            UserData user = new UserData(username,password, email);
-            //serverFacade.adduser
+            UserData user = new UserData(username, password, email);
             var result = new StringBuilder();
             var gson = new Gson();
-            result.append(gson.toJson(server.addUser(user)));
+            var output = facade.addUser(user);
+            result.append(gson.toJson(output));
+
+            this.state = State.POSTLOGIN;
 
             return result.toString();
         }
-        throw new ResponseException(ResponseException.Code.ClientError, "register parameter length");
+        throw new ResponseException(ResponseException.Code.ClientError, "wrong register parameter length");
     }
 
     public String login(String... params) throws ResponseException {
@@ -84,7 +93,9 @@ public class ChessClient {
 
             var result = new StringBuilder();
             var gson = new Gson();
-            result.append(gson.toJson(server.login(request)));
+            result.append(gson.toJson(facade.login(request)));
+
+            this.state = State.POSTLOGIN;
 
             return result.toString();
         }
@@ -92,12 +103,25 @@ public class ChessClient {
     }
 
     public String help() {
-        return """
-                register <USERNAME> <PASSWORD> <EMAIL> - to create an account
-                login <USERNAME> <PASSWORD> - to play chess
-                quit - to exit the program
-                help - displays possible commands
-                """;
+        if (state == State.PRELOGIN) {
+            return """
+                    register <USERNAME> <PASSWORD> <EMAIL> - to create an account
+                    login <USERNAME> <PASSWORD> - to play chess
+                    quit - to exit the program
+                    help - displays possible commands
+                    """;
+        } else if (state == State.POSTLOGIN) {
+            return """
+                    logout - to leave
+                    creategame - to make a new game
+                    listgames - to see all running games
+                    playgame - to join a game
+                    observegame - to watch a game without playing
+                    help - displays possible commands
+                    """;
+        } else {
+            return "wah where am I";
+        }
     }
 
     private void printPrompt() {
