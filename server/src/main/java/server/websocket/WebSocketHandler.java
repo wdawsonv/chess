@@ -1,13 +1,16 @@
 package server.websocket;
 
 
+import chess.ChessGame;
 import com.google.gson.Gson;
+import dataaccess.DataAccessException;
 import io.javalin.websocket.WsCloseContext;
 import io.javalin.websocket.WsCloseHandler;
 import io.javalin.websocket.WsConnectContext;
 import io.javalin.websocket.WsConnectHandler;
 import io.javalin.websocket.WsMessageContext;
 import io.javalin.websocket.WsMessageHandler;
+import service.UnauthorizedException;
 import service.UserService;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
@@ -31,7 +34,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     @Override
-    public void handleMessage(WsMessageContext ctx) throws IOException {
+    public void handleMessage(WsMessageContext ctx) throws IOException, UnauthorizedException, DataAccessException {
         String json = ctx.message();
         UserGameCommand userGameCommand = new Gson().fromJson(json, UserGameCommand.class);
 
@@ -42,12 +45,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
     }
 
-    private void handleConnectCommand(WsMessageContext ctx, UserGameCommand command) {
+    private void handleConnectCommand(WsMessageContext ctx, UserGameCommand command) throws UnauthorizedException, DataAccessException {
         connections.add(ctx.session);
         System.out.println("User joined game " + command.getGameID());
         ServerMessage response = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
-        ChessGame game = userService.
-        response.setGame(new Object());
+        ChessGame game = userService.getGame(command.getGameID(), command.getAuthToken());
+        response.setGame(game);
         ctx.send(new Gson().toJson(response));
 
     }
