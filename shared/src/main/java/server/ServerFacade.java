@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import exception.ResponseException;
 import model.*;
 
+
 import java.lang.module.ResolutionException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -49,8 +50,6 @@ public class ServerFacade {
     public GameList listGames(String authToken) throws ResponseException {
         var request = buildRequest("GET", "/game", null, authToken);
         var response = sendRequest(request);
-
-        System.out.println("raw json: " + response.body());
 
         GameListResponse wrapper = handleResponse(response, GameListResponse.class);
         return wrapper.games();

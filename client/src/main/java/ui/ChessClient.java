@@ -1,12 +1,12 @@
 package ui;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
+import chess.*;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import model.*;
+import org.glassfish.grizzly.http.server.Response;
 import server.ServerFacade;
+import websocket.commands.UserGameCommand;
 
 import java.util.*;
 
@@ -20,6 +20,8 @@ public class ChessClient {
     private String authToken = null;
     private GameList recentGameList = new GameList();
     private Map<Integer, Integer> idMatcher = new HashMap<>();
+    private ChessGame.TeamColor color = null;
+    private Integer gameplayGameID = null;
 
     public ChessClient(String serverUrl) {
         facade = new ServerFacade(serverUrl);
@@ -60,13 +62,20 @@ public class ChessClient {
                     case "quit" -> "quit";
                     default -> help();
                 };
-            } else /*if (state == State.POSTLOGIN)*/ {
+            } else if (state == State.POSTLOGIN) {
                 return switch (cmd) {
                     case "logout" -> logout();
                     case "creategame" -> createGame(params);
                     case "listgames" -> listGames();
                     case "playgame" -> joinGame(params);
                     case "observegame" -> observeGame(params);
+                    default -> help();
+                };
+            } else /*if (state == State.GAMEPLAY)*/ {
+                return switch (cmd) {
+                    case "redraw" -> reprintBoard();
+                    case "leave" -> leaveGame();
+                    case "legalmoves" -> highlightMoves(params);
                     default -> help();
                 };
             }
@@ -151,10 +160,13 @@ public class ChessClient {
             try {
                 JoinResult result = facade.joinGame(joinRequest, authToken);
                 state = State.GAMEPLAY;
+                this.gameplayGameID = realID;
                 if (teamColor.equals("WHITE")) {
+                    this.color = ChessGame.TeamColor.WHITE;
                     return "Game " + params[0] + " successfully joined\n" +
                             displayGameWhite(getGameFromId(realID)); //then display the chungus board (white side if white black side if black)
                 } else {
+                    this.color = ChessGame.TeamColor.BLACK;
                     return "Game " + params[0] + " successfully joined\n" +
                             displayGameBlack(getGameFromId(realID)); //then display the chungus board (white side if white black side if black)
                 }
@@ -163,6 +175,29 @@ public class ChessClient {
             }
         }
         throw new ResponseException(ResponseException.Code.ClientError, "Please join a game with the format \"joingame [game ID] [WHITE/BLACK]\"");
+    }
+
+    public String highlightMoves(String... params) throws ResponseException {
+        if (params.length == 1) {
+            ChessPosition startPos = notationToPosition(params[0]);
+            Collection<ChessMove> legalMoves = getGameFromId(gameplayGameID).validMoves(startPos);
+            Set<ChessPosition> allMoves = new HashSet<>();
+            for (ChessMove move : legalMoves) {
+                allMoves.add(move.getEndPosition());
+            }
+
+            if (this.color == ChessGame.TeamColor.BLACK) {
+                return highlightedMovesBlack(getGameFromId(gameplayGameID), allMoves);
+            } else {
+                return highlightedMovesBlack(getGameFromId(gameplayGameID), allMoves);
+//                return highlightedMovesWhite(getGameFromId(gameplayGameID));
+            }
+
+            //you're gonna get A1
+            //figure out what legal moves returns
+            //display the board but if the current square is one of the legal moves highlight it green beannn
+        }
+        throw new ResponseException(ResponseException.Code.ClientError, "Display all legal moves with \"legalmoves [piece position]\", e.g. 'legalmoves a2'");
     }
 
     public String observeGame(String... params) throws ResponseException {
@@ -186,6 +221,29 @@ public class ChessClient {
         throw new ResponseException(ResponseException.Code.ClientError, "Please observe a game with the format \"observegame [game ID]\"");
     }
 
+    public String reprintBoard() {
+        if (this.color.equals(ChessGame.TeamColor.BLACK)) {
+            return displayGameBlack(getGameFromId(this.gameplayGameID));
+        } else {
+            return displayGameWhite(getGameFromId(this.gameplayGameID));
+        }
+    }
+
+    public String leaveGame() { //NOT YET IMPLEMENTED
+        this.state = State.POSTLOGIN;
+        this.color = null;
+        this.gameplayGameID = null;
+
+        return "Game successfully left";
+    }
+
+    private ChessPosition notationToPosition(String input) {
+        input = input.toLowerCase();
+        int col = input.charAt(0) - 'a' + 1;
+        int row = input.charAt(1) - '1' + 1;
+        return new ChessPosition(row, col);
+    }
+
     private ChessGame getGameFromId(int gameID) {
         for (GameData game : recentGameList) {
             if (game.gameID() == gameID) {
@@ -193,6 +251,78 @@ public class ChessClient {
             }
         }
         return null;
+    }
+
+    private String highlightedMovesBlack(ChessGame game, Set<ChessPosition> moves) {
+        StringBuilder display = new StringBuilder();
+        ChessBoard board = game.getBoard();
+        ChessPiece[][] squares = board.squares;
+
+        //10 by 10 grid, top down right to left
+        for (int row = 9; row >= 0; row--) {
+            for (int col = 0; col < 10; col++) {
+                if (row == 0 || row == 9 || col == 0 || col == 9) {
+                    display.append(SET_BG_COLOR_LIGHT_GREY);
+
+                    //put all outside logic in here
+                    if ((row == 9 && col > 0 && col < 9) || (row == 0 && col > 0 && col < 9) ) {
+                        String colVal = switch (col) {
+                            case 1 -> "H ";
+                            case 2 -> "  G ";
+                            case 3 -> "  F ";
+                            case 4 -> "  E ";
+                            case 5 -> " D ";
+                            case 6 -> "  C ";
+                            case 7 -> "  B ";
+                            case 8 -> "  A";
+                            default -> "";
+                        };
+                        display.append(colVal);
+                    } else if ((col == 9 && row > 0 && row < 9) || (col == 0 && row > 0 && row < 9) ) {
+                        String rowVal = switch (row) {
+                            case 1 -> " 8 ";
+                            case 2 -> " 7 ";
+                            case 3 -> " 6 ";
+                            case 4 -> " 5 ";
+                            case 5 -> " 4 ";
+                            case 6 -> " 3 ";
+                            case 7 -> " 2 ";
+                            case 8 -> " 1 ";
+                            default -> "";
+                        };
+                        display.append(rowVal);
+                    } else {
+                        display.append(EMPTY);
+                    }
+                } else {
+                    int shiftRow = row - 1;
+                    int shiftCol = col - 1;
+                    int boardRow = 7 - shiftRow;
+                    int boardCol = 7 - shiftCol;
+                    ChessPosition tempPosition = new ChessPosition(boardRow + 1, boardCol + 1);
+                    if (moves.contains(tempPosition)) {
+                        display.append(SET_BG_COLOR_GREEN);
+                    } else if ((shiftRow + shiftCol) % 2 == 1) {
+                        display.append(SET_BG_COLOR_DARK_GREY);
+                    } else {
+                        display.append(SET_BG_COLOR_BLACK);
+                    }
+
+
+                    ChessPiece piece = squares[boardRow][boardCol];
+
+                    if (piece == null) {
+                        display.append(EMPTY);
+                    } else {
+                        display.append(pieceSymbol(piece));
+                    }
+                }
+
+                display.append(RESET_BG_COLOR);
+            }
+            display.append("\n");
+        }
+        return display.toString();
     }
 
     private String displayGameBlack(ChessGame game) {
@@ -394,6 +524,14 @@ public class ChessClient {
                     playgame - to join a game
                     observegame - to watch a game without playing
                     help - displays possible commands
+                    """;
+        } else if (state == State.GAMEPLAY) {
+            return """
+                    redraw - to reprint the board
+                    leave - to exit the game
+                    move <STARTPOSITION> <ENDPOSITION> - a piece
+                    resign - will ask you to confirm
+                    legalmoves <STARTPOSITION> - to highlight all legal moves of the selected piece
                     """;
         } else {
             return "wah where am I";
