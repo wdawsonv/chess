@@ -150,8 +150,13 @@ public class ChessClient {
             try {
                 JoinResult result = facade.joinGame(joinRequest, authToken);
                 state = State.GAMEPLAY;
-                return "Game " + params[0] + " successfully joined\n" +
-                        displayGameWhite(getGameFromId(realID)); //then display the chungus board (white side if white black side if black)
+                if (teamColor.equals("WHITE")) {
+                    return "Game " + params[0] + " successfully joined\n" +
+                            displayGameWhite(getGameFromId(realID)); //then display the chungus board (white side if white black side if black)
+                } else {
+                    return "Game " + params[0] + " successfully joined\n" +
+                            displayGameBlack(getGameFromId(realID)); //then display the chungus board (white side if white black side if black)
+                }
             } catch (Exception ex) {
                 return "Unable to join that game/color, please try a different one";
             }
@@ -166,6 +171,74 @@ public class ChessClient {
             }
         }
         return null;
+    }
+
+    private String displayGameBlack(ChessGame game) {
+        StringBuilder display = new StringBuilder();
+        ChessBoard board = game.getBoard();
+        ChessPiece[][] squares = board.squares;
+
+        //10 by 10 grid, top down right to left
+        for (int row = 9; row >= 0; row--) {
+            for (int col = 0; col < 10; col++) {
+                if (row == 0 || row == 9 || col == 0 || col == 9) {
+                    display.append(SET_BG_COLOR_LIGHT_GREY);
+
+                    //put all outside logic in here
+                    if ((row == 9 && col > 0 && col < 9) || (row == 0 && col > 0 && col < 9) ) {
+                        String colVal = switch (col) {
+                            case 1 -> "H ";
+                            case 2 -> "  G ";
+                            case 3 -> "  F ";
+                            case 4 -> "  E ";
+                            case 5 -> " D ";
+                            case 6 -> "  C ";
+                            case 7 -> "  B ";
+                            case 8 -> "  A";
+                            default -> "";
+                        };
+                        display.append(colVal);
+                    } else if ((col == 9 && row > 0 && row < 9) || (col == 0 && row > 0 && row < 9) ) {
+                        String rowVal = switch (row) {
+                            case 1 -> " 8 ";
+                            case 2 -> " 7 ";
+                            case 3 -> " 6 ";
+                            case 4 -> " 5 ";
+                            case 5 -> " 4 ";
+                            case 6 -> " 3 ";
+                            case 7 -> " 2 ";
+                            case 8 -> " 1 ";
+                            default -> "";
+                        };
+                        display.append(rowVal);
+                    } else {
+                        display.append(EMPTY);
+                    }
+                } else {
+                    int shiftRow = row - 1;
+                    int shiftCol = col - 1;
+
+                    if ((shiftRow + shiftCol) % 2 == 1) {
+                        display.append(SET_BG_COLOR_DARK_GREY);
+                    } else {
+                        display.append(SET_BG_COLOR_BLACK);
+                    }
+
+
+                    ChessPiece piece = squares[shiftRow][7 - shiftCol];
+
+                    if (piece == null) {
+                        display.append(EMPTY);
+                    } else {
+                        display.append(pieceSymbol(piece));
+                    }
+                }
+
+                display.append(RESET_BG_COLOR);
+            }
+            display.append("\n");
+        }
+        return display.toString();
     }
 
     private String displayGameWhite(ChessGame game) {
