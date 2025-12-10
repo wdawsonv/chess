@@ -162,7 +162,17 @@ public class MySqlDataAccess {
                         //might have to make something like isNullWhite(rs) :P
                         if (rs.getString("whiteUsername").equals(username)) {
                             return ChessGame.TeamColor.WHITE;
-                        } else {
+                        }
+                    }
+                }
+            }
+            var statementBlack = "SELECT blackUsername FROM games where gameID=?";
+            try (PreparedStatement ps = conn.prepareStatement(statementBlack)) {
+                ps.setInt(1, gameID);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        //might have to make something like isNullWhite(rs) :P
+                        if (rs.getString("blackUsername").equals(username)) {
                             return ChessGame.TeamColor.BLACK;
                         }
                     }
