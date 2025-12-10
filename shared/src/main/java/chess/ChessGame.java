@@ -27,6 +27,15 @@ public class ChessGame {
     private int bPassCol;
     private boolean wPassanted;
     private boolean bPassanted;
+    private boolean resigned = false;
+
+    public void resign() {
+        resigned = true;
+    }
+
+    public boolean isResigned() {
+        return resigned;
+    }
 
     public ChessGame() {
 

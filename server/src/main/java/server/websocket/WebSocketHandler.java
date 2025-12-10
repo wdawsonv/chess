@@ -52,6 +52,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         } else if (userGameCommand.getCommandType() == UserGameCommand.CommandType.MAKE_MOVE) {
             ChessMove move = userGameCommand.getMove();
             handleMakeMove(ctx, userGameCommand, move);
+        } else if (userGameCommand.getCommandType() == UserGameCommand.CommandType.RESIGN) {
+            handleResign(ctx, userGameCommand);
         }
     }
 
@@ -91,6 +93,11 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         } catch (UnauthorizedException ex) {
             sendError(ctx, "unauthorized: " + ex.getMessage());
         }
+
+        if (game.isResigned()) {
+            sendError(ctx, "Game is over stop trying to move 4head");
+            return;
+        }
         System.out.println("Turn before move: " + game.getTeamTurn());
 
         ChessGame.TeamColor userColor = userService.getPlayerColor(gameID, token);
@@ -110,6 +117,27 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         sendLoadGame(ctx, game);
         sendNotificationNotToMe(gameID, ctx.session, "Move made: " + move.toString());
         broadcastUpdatedBoardToOthers(gameID, ctx.session, game);
+    }
+
+    private void handleResign(WsMessageContext ctx, UserGameCommand command) throws UnauthorizedException, BadRequestException, DataAccessException, IOException {
+        String token = command.getAuthToken();
+        int gameID = command.getGameID();
+
+        ChessGame.TeamColor resignerColor = userService.getPlayerColor(gameID, token);
+        ChessGame game = userService.getGame(gameID, token);
+
+        if (resignerColor == null) {
+            sendError(ctx, "Error: spectators can't resign");
+            return;
+        }
+
+        game.resign();
+        userService.saveGame(gameID, game, token);
+
+        String message = resignerColor + " team resigns";
+        ServerMessage resignation = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
+        resignation.setMessage(message);
+        connections.broadcast(gameID, new Gson().toJson(resignation));
     }
 
     private void sendLoadGame(WsMessageContext ctx, ChessGame game) {
