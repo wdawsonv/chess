@@ -18,7 +18,7 @@ public class ChessClient {
     private final ServerFacade facade;
     private State state = State.PRELOGIN;
     private String authToken = null;
-    private List<GameData> recentGameList = new ArrayList<>();
+    private GameList recentGameList = new GameList();
 
     public ChessClient(String serverUrl) {
         facade = new ServerFacade(serverUrl);
@@ -139,7 +139,7 @@ public class ChessClient {
             recentGameList = facade.listGames(authToken);
             return recentGameList.toString();
         } catch (Exception ex) {
-            return "Unauthenticated error, please exit the program and log in again";
+            return ex + " Unauthenticated error, please exit the program and log in again";
         }
     }
 

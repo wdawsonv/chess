@@ -45,10 +45,10 @@ public class ServerFacade {
         return handleResponse(response, CreateResult.class);
     }
 
-    public List<GameData> listGames(String authToken) throws ResponseException {
+    public GameList listGames(String authToken) throws ResponseException {
         var request = buildRequest("GET", "/game", null, authToken);
         var response = sendRequest(request);
-        return handleResponse(response, List.class);
+        return handleResponse(response, GameList.class);
     }
 
     private HttpRequest buildRequest(String method, String path, Object body, String authToken) {
@@ -83,6 +83,7 @@ public class ServerFacade {
 
     private <T> T handleResponse(HttpResponse<String> response, Class<T> responseClass) throws ResponseException {
         var status = response.statusCode();
+        System.out.println("raw json: " + response.body());
         if (!isSuccessful(status)) {
             var body = response.body();
             if (body != null) {

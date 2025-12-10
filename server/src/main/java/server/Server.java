@@ -108,12 +108,9 @@ public class Server {
         String token = ctx.header("authorization");
 
         try {
-            List<GameData> gList = service.listGames(token);
-            Map<String, Object> temp = new HashMap<>();
-            temp.put("games", gList);
+            GameList gList = service.listGames(token);
             ctx.status(200);
-            ctx.result(new Gson().toJson(temp));
-//            ctx.result(new Gson().toJson(gList));
+            ctx.result(new Gson().toJson(gList));
         } catch (UnauthorizedException e) {
             ctx.status(401);
             ctx.json("{ \"message\": \"Error: " + e.getMessage() + "\" }");

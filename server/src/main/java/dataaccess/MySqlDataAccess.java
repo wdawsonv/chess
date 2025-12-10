@@ -193,8 +193,8 @@ public class MySqlDataAccess {
         return (blackUsername == null);
     }
 
-    public List<GameData> getGamesList() throws DataAccessException, SQLException {
-        var result = new ArrayList<GameData>();
+    public GameList getGamesList() throws DataAccessException, SQLException {
+        var result = new GameList();
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "SELECT gameID, whiteUsername, blackUsername, gamename, json FROM games";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {

@@ -71,12 +71,12 @@ public class UserService {
 
     }
 
-    public List<GameData> listGames(String token) throws UnauthorizedException, DataAccessException, SQLException {
+    public GameList listGames(String token) throws UnauthorizedException, DataAccessException, SQLException {
 
         if (getAuth(token) == null) {
             throw new UnauthorizedException("unauthorized");
         } else {
-            List<GameData> list = getGamesList();
+            GameList list = getGamesList();
             return list;
         }
     }
@@ -125,7 +125,7 @@ public class UserService {
         mySqlDataAccess.removeAuth(authData);
     }
 
-    private List<GameData> getGamesList() throws DataAccessException, SQLException {
+    private GameList getGamesList() throws DataAccessException, SQLException {
         return mySqlDataAccess.getGamesList();
     }
 
