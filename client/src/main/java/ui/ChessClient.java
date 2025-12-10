@@ -66,6 +66,7 @@ public class ChessClient {
                     case "creategame" -> createGame(params);
                     case "listgames" -> listGames();
                     case "playgame" -> joinGame(params);
+                    case "observegame" -> observeGame(params);
                     default -> help();
                 };
             }
@@ -162,6 +163,27 @@ public class ChessClient {
             }
         }
         throw new ResponseException(ResponseException.Code.ClientError, "Please join a game with the format \"joingame [game ID] [WHITE/BLACK]\"");
+    }
+
+    public String observeGame(String... params) throws ResponseException {
+        if (params.length == 1) {
+            int placeholderId = Integer.parseInt(params[0]);
+            int realID;
+            try {
+                realID = idMatcher.get(placeholderId);
+            } catch (Exception ex) {
+                return "type listgames to see a list of available games to join";
+            }
+
+            try {
+                state = State.GAMEPLAY;
+                return "Game " + params[0] + " successfully joined\n" +
+                        displayGameWhite(getGameFromId(realID));
+            } catch (Exception ex) {
+                return "Unable to join that game, please try a different one";
+            }
+        }
+        throw new ResponseException(ResponseException.Code.ClientError, "Please observe a game with the format \"observegame [game ID]\"");
     }
 
     private ChessGame getGameFromId(int gameID) {
