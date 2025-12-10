@@ -59,6 +59,7 @@ public class ChessClient {
                 };
             } else /*if (state == State.POSTLOGIN)*/ {
                 return switch (cmd) {
+                    case "logout" -> logout();
                     default -> help();
                 };
             }
@@ -100,6 +101,14 @@ public class ChessClient {
             return result.toString();
         }
         throw new ResponseException(ResponseException.Code.ClientError, "login failure");
+    }
+
+    public String logout() throws ResponseException {
+        facade.logout();
+
+        this.state = State.PRELOGIN;
+
+        return "Successfully logged you out";
     }
 
     public String help() {

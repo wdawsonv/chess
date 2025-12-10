@@ -11,14 +11,15 @@ import server.Server;
 import server.ServerFacade;
 import service.UnauthorizedException;
 import service.UserService;
+import ui.ChessClient;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 public class ServerFacadeTests {
 
     private static Server server;
-    static ServerFacade facade;
+    static ChessClient client;
     static final MySqlDataAccess MEMORY_DATA_ACCESS;
 
     static {
@@ -33,7 +34,7 @@ public class ServerFacadeTests {
         var port = server.run(0);
         var url = "http://localhost:" + port;
         System.out.println("Started test HTTP server on " + port);
-        facade = new ServerFacade(url);
+        client = new ChessClient(url);
     }
 
     @BeforeEach
@@ -58,21 +59,43 @@ public class ServerFacadeTests {
 
     @Test
     void registerUserPositiveTest() throws Exception {
-        UserData user1 = new UserData("username13", "password1", "email1");
-        RegisterResult result = facade.addUser(user1);
+        String[] params1 = new String[]{"username13", "password1", "email1"};
+        String result = client.register(params1);
 
-        System.out.println( "AAAAAAAH" + result);
-        Assertions.assertEquals("username13", result.username());
-        Assertions.assertNotNull(result.authToken());
+        assertEquals("Successsfully logged in!", result);
     }
 
     @Test
     void registerUserNegativeTest() throws Exception {
-        UserData user1 = new UserData("username14", "password1", "email1");
-        facade.addUser(user1);
-        UserData user2 = new UserData("username12", "password", "email1");
-        facade.addUser(user2);
-        Assertions.assertThrows(NullPointerException.class, () -> facade.addUser(user1));
+        String[] params1 = new String[]{"username14", "password1", "email1"};
+        String result = client.register(params1);
+        assertEquals("""
+                    logout - to leave
+                    creategame - to make a new game
+                    listgames - to see all running games
+                    playgame - to join a game
+                    observegame - to watch a game without playing
+                    help - displays possible commands
+                    """, result);
+    }
+
+    @Test
+    void logoutPositiveTest() throws Exception {
+        String[] params = new String[]{"username14", "password1", "email1"};
+        client.register(params);
+
+        assertDoesNotThrow(() -> client.logout());
+    }
+
+    @Test
+    void logoutNegativeTest() throws Exception {
+        String result = client.logout();
+        assertEquals("""
+                    register <USERNAME> <PASSWORD> <EMAIL> - to create an account
+                    login <USERNAME> <PASSWORD> - to play chess
+                    quit - to exit the program
+                    help - displays possible commands
+                    """, result);
     }
 
 }
