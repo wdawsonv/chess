@@ -9,7 +9,8 @@ import java.util.Objects;
  * methods.
  */
 public class ServerMessage {
-    ServerMessageType serverMessageType;
+    public ServerMessageType serverMessageType;
+    public Object game;
 
     public enum ServerMessageType {
         LOAD_GAME,
@@ -19,6 +20,10 @@ public class ServerMessage {
 
     public ServerMessage(ServerMessageType type) {
         this.serverMessageType = type;
+    }
+
+    public void setGame(Object game) {
+        this.game = game;
     }
 
     public ServerMessageType getServerMessageType() {
