@@ -19,6 +19,7 @@ public class Server {
 
     private final Javalin javalin;
     private final UserService service;
+    private final WebSocketHandler webSocketHandler;
 
     public Server() {
             this(new UserService(new MySqlDataAccess()));
@@ -27,6 +28,8 @@ public class Server {
     public Server(UserService service) {
 
         this.service = service;
+
+        webSocketHandler = new WebSocketHandler();
 
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
                 .post("/user", this::register)
