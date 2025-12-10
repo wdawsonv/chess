@@ -201,6 +201,17 @@ public class MySqlDataAccess {
         }
     }
 
+    public void updateExistingGame(int gameID, ChessGame game)  {
+
+        String json = new Gson().toJson(game);
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "UPDATE games SET json=? WHERE gameID=?";
+            executeUpdate(statement, json, gameID);
+        } catch (DataAccessException | SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private boolean isNullWhite(ResultSet rs) throws SQLException {
         var whiteUsername = rs.getString("whiteUsername");
         return (whiteUsername == null);

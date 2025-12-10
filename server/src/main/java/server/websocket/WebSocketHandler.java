@@ -1,5 +1,7 @@
 package server.websocket;
 
+import chess.ChessMove;
+import chess.InvalidMoveException;
 import org.eclipse.jetty.websocket.api.Session;
 
 import chess.ChessGame;
@@ -39,7 +41,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     @Override
-    public void handleMessage(WsMessageContext ctx) throws IOException, UnauthorizedException, DataAccessException, SQLException, BadRequestException {
+    public void handleMessage(WsMessageContext ctx) throws IOException, UnauthorizedException, DataAccessException, SQLException, BadRequestException, InvalidMoveException {
         String json = ctx.message();
         UserGameCommand userGameCommand = new Gson().fromJson(json, UserGameCommand.class);
 
@@ -47,6 +49,9 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
         if (userGameCommand.getCommandType() == UserGameCommand.CommandType.CONNECT) {
             handleConnectCommand(ctx, userGameCommand);
+        } else if (userGameCommand.getCommandType() == UserGameCommand.CommandType.MAKE_MOVE) {
+            ChessMove move = userGameCommand.getMove();
+            handleMakeMove(ctx, userGameCommand, move);
         }
     }
 
@@ -74,6 +79,31 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
         sendNotificationNotToMe(gameID, ctx.session, "A player has joined game " + gameID);
 
+    }
+
+    private void handleMakeMove(WsMessageContext ctx, UserGameCommand command, ChessMove move) throws UnauthorizedException, BadRequestException, DataAccessException, InvalidMoveException, IOException {
+        String token = command.getAuthToken();
+        int gameID = command.getGameID();
+
+        ChessGame game = userService.getGame(gameID, token);
+
+        game.makeMove(move);
+        userService.saveGame(gameID, game, token);
+        sendLoadGame(ctx, game);
+        sendNotificationNotToMe(gameID, ctx.session, "Move made: " + move.toString());
+        broadcastUpdatedBoardToOthers(gameID, ctx.session, game);
+    }
+
+    private void sendLoadGame(WsMessageContext ctx, ChessGame game) {
+        ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
+        message.setGame(game);
+        ctx.send(new Gson().toJson(message));
+    }
+
+    private void broadcastUpdatedBoardToOthers(int gameID, Session session, ChessGame game) {
+        ServerMessage update = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
+        update.setGame(game);
+        connections.broadcastExcept(gameID, session, new Gson().toJson(update));
     }
 
     private void sendError(WsMessageContext ctx, String message) throws IOException {

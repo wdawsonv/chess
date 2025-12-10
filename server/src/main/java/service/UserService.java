@@ -104,8 +104,22 @@ public class UserService {
         }
     }
 
+    public void saveGame(int gameID, ChessGame game, String token) throws UnauthorizedException, DataAccessException, BadRequestException {
+        if (getAuth(token) == null) {
+            throw new UnauthorizedException("unauthorized");
+        } else if (gameID == 0) {
+            throw new BadRequestException("you need a gameID in there zlawg");
+        } else {
+            saveExistingGame(gameID, game);
+        }
+    }
+
     private ChessGame getGame(int gameID) throws DataAccessException {
         return mySqlDataAccess.getChessGame(gameID).game();
+    }
+
+    private void saveExistingGame(int gameID, ChessGame game) {
+        mySqlDataAccess.updateExistingGame(gameID, game);
     }
 
 
