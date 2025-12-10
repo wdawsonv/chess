@@ -29,6 +29,15 @@ public class ConnectionManager {
         }
     }
 
+    public void broadcastExcept(int gameID, Session excludedSession, String message) {
+        if (!gameSessions.containsKey(gameID)) return;
+        for (Session session : gameSessions.get(gameID)) {
+            if (session != excludedSession && session.isOpen()) {
+                session.getRemote().sendString(message, null);
+            }
+        }
+    }
+
     public void broadcast(int gameID, String message) throws IOException {
         if (!gameSessions.containsKey(gameID)) return;
         for (Session session : gameSessions.get(gameID)) {

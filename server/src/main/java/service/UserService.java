@@ -94,9 +94,11 @@ public class UserService {
         }
     }
 
-    public ChessGame getGame(int gameID, String token) throws UnauthorizedException, DataAccessException {
+    public ChessGame getGame(int gameID, String token) throws UnauthorizedException, DataAccessException, BadRequestException {
         if (getAuth(token) == null) {
             throw new UnauthorizedException("unauthorized");
+        } else if (gameID == 0) {
+            throw new BadRequestException("you need a gameID in there zlawg");
         } else {
             return getGame(gameID);
         }
