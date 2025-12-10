@@ -126,6 +126,11 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         ChessGame.TeamColor resignerColor = userService.getPlayerColor(gameID, token);
         ChessGame game = userService.getGame(gameID, token);
 
+        if (game.isResigned()) {
+            sendError(ctx, "don't resign slime you already won!");
+            return;
+        }
+
         if (resignerColor == null) {
             sendError(ctx, "Error: spectators can't resign");
             return;
