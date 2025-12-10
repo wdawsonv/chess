@@ -49,6 +49,8 @@ public class ServerFacade {
     public GameList listGames(String authToken) throws ResponseException {
         var request = buildRequest("GET", "/game", null, authToken);
         var response = sendRequest(request);
+
+        System.out.println("raw json: " + response.body());
         return handleResponse(response, GameList.class);
     }
 

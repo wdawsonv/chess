@@ -110,7 +110,7 @@ public class Server {
         try {
             GameList gList = service.listGames(token);
             ctx.status(200);
-            ctx.result(new Gson().toJson(gList));
+            ctx.result(new Gson().toJson(Map.of("games", gList)));
         } catch (UnauthorizedException e) {
             ctx.status(401);
             ctx.json("{ \"message\": \"Error: " + e.getMessage() + "\" }");
