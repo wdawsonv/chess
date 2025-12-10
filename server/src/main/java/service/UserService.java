@@ -94,6 +94,18 @@ public class UserService {
         }
     }
 
+    public ChessGame getGame(int gameID, String token) throws UnauthorizedException, DataAccessException {
+        if (getAuth(token) == null) {
+            throw new UnauthorizedException("unauthorized");
+        } else {
+            return getGame(gameID);
+        }
+    }
+
+    private ChessGame getGame(int gameID) throws DataAccessException {
+        return mySqlDataAccess.getChessGame(gameID).game();
+    }
+
 
     private CreateResult createNewGame(String gameName) throws DataAccessException, AlreadyTakenException {
         return mySqlDataAccess.createNewGame(gameName);

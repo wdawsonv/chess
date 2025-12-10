@@ -133,6 +133,24 @@ public class MySqlDataAccess {
         return null;
     }
 
+    public GameData getChessGame(int gameID) throws DataAccessException {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT gameID, whiteUsername, blackUsername, gamename, json FROM games where gameID=?";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setInt(1, gameID);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return readGame(rs);
+
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new DataAccessException(e.getMessage() + " BLAH!");
+        }
+        return null;
+    }
+
     private UserData readUser(ResultSet rs) throws SQLException {
         var username = rs.getString("username");
         var password = rs.getString("password");

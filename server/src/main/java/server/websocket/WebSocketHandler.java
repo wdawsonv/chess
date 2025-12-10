@@ -48,25 +48,36 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
     }
 
-    private void handleConnectCommand(WsMessageContext ctx, UserGameCommand command) throws UnauthorizedException, DataAccessException, SQLException {
-        connections.add(ctx.session);
+    private void handleConnectCommand(WsMessageContext ctx, UserGameCommand command) throws UnauthorizedException, DataAccessException, SQLException, IOException {
         String token = command.getAuthToken();
         int gameID = command.getGameID();
+        connections.add(gameID, ctx.session);
+
         System.out.println("User joined game " + gameID);
         ServerMessage response = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
         GameList allGames = userService.listGames(token);
 
-        ChessGame game = new ChessGame();
-        for (GameData gameData : allGames) {
-            if (gameData.gameID() == gameID) {
-                game = gameData.game();
-            }
-        }
+
+        ChessGame game = userService.getGame(gameID, token);
+//        ChessGame game = new ChessGame();
+//        for (GameData gameData : allGames) {
+//            if (gameData.gameID() == gameID) {
+//                game = gameData.game();
+//            }
+//        }
 
         response.setGame(game);
 
         ctx.send(new Gson().toJson(response));
 
+//        sendNotification(gameID, "A player has joined game " + gameID);
+
+    }
+
+    private void sendNotification(int gameID, String text) throws IOException {
+        ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
+        message.setMessage(text);
+        connections.broadcast(gameID, new Gson().toJson(message));
     }
 
     @Override
