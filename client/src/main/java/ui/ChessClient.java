@@ -2,13 +2,12 @@ package ui;
 
 import com.google.gson.Gson;
 import exception.ResponseException;
-import model.LoginRequest;
-import model.LoginResult;
-import model.RegisterResult;
-import model.UserData;
+import model.*;
 import server.ServerFacade;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 
 import static java.awt.Color.*;
@@ -19,6 +18,7 @@ public class ChessClient {
     private final ServerFacade facade;
     private State state = State.PRELOGIN;
     private String authToken = null;
+    private List<GameData> recentGameList = new ArrayList<>();
 
     public ChessClient(String serverUrl) {
         facade = new ServerFacade(serverUrl);
@@ -62,6 +62,8 @@ public class ChessClient {
             } else /*if (state == State.POSTLOGIN)*/ {
                 return switch (cmd) {
                     case "logout" -> logout();
+                    case "creategame" -> createGame(params);
+                    case "listgames" -> listGames();
                     default -> help();
                 };
             }
@@ -80,6 +82,7 @@ public class ChessClient {
             try {
                 RegisterResult result = facade.addUser(user);
                 this.state = State.POSTLOGIN;
+                authToken = result.authToken();
                 return "Successfully registered and logged in as " + result.username();
             } catch (Exception ex) {
                 return "Username already taken";
@@ -98,6 +101,7 @@ public class ChessClient {
             try {
                 LoginResult result = facade.login(request);
                 this.state = State.POSTLOGIN;
+                authToken = result.authToken();
                 return "Successfully logged in as " + result.username();
             } catch (Exception ex) {
                 return "Invalid username/password";
@@ -107,11 +111,36 @@ public class ChessClient {
     }
 
     public String logout() throws ResponseException {
-        facade.logout();
+        facade.logout(authToken);
 
         this.state = State.PRELOGIN;
 
         return "Successfully logged you out";
+    }
+
+    public String createGame(String... params) throws ResponseException {
+        if (params.length == 1) {
+            String gameName = params[0];
+            CreateRequest createRequest = new CreateRequest(gameName);
+
+            try {
+                CreateResult result = facade.createGame(createRequest, authToken);
+                return "Game " + gameName + " successfully created";
+            } catch (Exception ex) {
+                return "That name is already taken, please choose a new one";
+            }
+        }
+        throw new ResponseException(ResponseException.Code.ClientError, "Please create a game with the format \"creategame [name]\"");
+    }
+
+    public String listGames() throws ResponseException {
+
+        try {
+            recentGameList = facade.listGames(authToken);
+            return recentGameList.toString();
+        } catch (Exception ex) {
+            return "Unauthenticated error, please exit the program and log in again";
+        }
     }
 
     public String help() {

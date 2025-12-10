@@ -111,4 +111,40 @@ public class ServerFacadeTests {
         Assertions.assertThrows(ResponseException.class, () -> client.login("onlyUsername"));
     }
 
+    @Test
+    void createGamePositiveTest() throws ResponseException {
+        String[] params1 = new String[]{"username13", "password1", "email1"};
+        client.register(params1);
+        String result = client.createGame("swag");
+        assertEquals("Game swag successfully created", result);
+    }
+
+    @Test
+    void createGameNegativeTest() throws ResponseException {
+        String[] params1 = new String[]{"username13", "password1", "email1"};
+        client.register(params1);
+        client.createGame("swag");
+        String result = client.createGame("swag");
+        assertEquals("That name is already taken, please choose a new one", result);
+    }
+
+    @Test
+    void listGamesPositiveTest() throws ResponseException {
+        String[] params1 = new String[]{"username13", "password1", "email1"};
+        client.register(params1);
+        client.createGame("swag1");
+        client.createGame("swag2");
+        client.createGame("swag3");
+        String result = client.listGames();
+        assertEquals(
+                """
+                ---------------------------------------------------------
+                | Game ID  |  Game Name |  White Player | Black Player  |
+                | 1        |  swag1     | AVAILABLE     | AVAILABLE     |
+                | 2        |  swag2     | AVAILABLE     | AVAILABLE     |
+                | 3        |  swag3     | AVAILABLE     | AVAILABLE     |
+                ---------------------------------------------------------
+                """, result);
+    }
+
 }

@@ -11,6 +11,7 @@ import java.net.http.HttpRequest.BodyPublisher;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.util.List;
 
 public class ServerFacade {
     private final HttpClient client = HttpClient.newHttpClient();
@@ -21,31 +22,42 @@ public class ServerFacade {
     }
 
     public RegisterResult addUser(UserData user) throws ResponseException {
-        var request = buildRequest("POST", "/user", user);
+        var request = buildRequest("POST", "/user", user, null);
         var response = sendRequest(request);
         return handleResponse(response, RegisterResult.class);
     }
 
     public LoginResult login(LoginRequest login) throws ResponseException {
-        var request = buildRequest("POST", "/session", login);
+        var request = buildRequest("POST", "/session", login, null);
         var response = sendRequest(request);
         return handleResponse(response, LoginResult.class);
     }
 
-    public void logout() throws ResponseException {
-        var request = buildRequest("DELETE", "/session", "");
+    public void logout(String token) throws ResponseException {
+        var request = buildRequest("DELETE", "/session", token, token);
         var response = sendRequest(request);
-        //this may log everyone out accidentally
+        //this may log everyone out accidentally I'M NOT SURE!!!!!!!!!
     }
 
-//    public List<GameData> listGames() {
-//
-//    }
+    public CreateResult createGame(CreateRequest createRequest, String authToken) throws ResponseException {
+        var request = buildRequest("POST", "/game", createRequest, authToken);
+        var response = sendRequest(request);
+        return handleResponse(response, CreateResult.class);
+    }
 
-    private HttpRequest buildRequest(String method, String path, Object body) {
+    public List<GameData> listGames(String authToken) throws ResponseException {
+        var request = buildRequest("GET", "/game", null, authToken);
+        var response = sendRequest(request);
+        return handleResponse(response, List.class);
+    }
+
+    private HttpRequest buildRequest(String method, String path, Object body, String authToken) {
         var request = HttpRequest.newBuilder()
                 .uri(URI.create(serverUrl + path))
                 .method(method, makeRequestBody(body));
+        if (authToken != null) {
+            request.header("authorization", authToken);
+        }
         if (body != null) {
             request.setHeader("Content-Type", "application/json");
         }
