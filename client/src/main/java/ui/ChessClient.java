@@ -5,10 +5,7 @@ import exception.ResponseException;
 import model.*;
 import server.ServerFacade;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 import static java.awt.Color.*;
 import static ui.EscapeSequences.*;
@@ -19,6 +16,7 @@ public class ChessClient {
     private State state = State.PRELOGIN;
     private String authToken = null;
     private GameList recentGameList = new GameList();
+    private Map<Integer, Integer> idMatcher = new HashMap<>();
 
     public ChessClient(String serverUrl) {
         facade = new ServerFacade(serverUrl);
@@ -137,9 +135,34 @@ public class ChessClient {
 
         try {
             recentGameList = facade.listGames(authToken);
-            return recentGameList.toString();
+
+            idMatcher.clear();
+            int idNumPublic = 1;
+            for (GameData game : recentGameList) {
+                idMatcher.put(idNumPublic, game.gameID());
+                idNumPublic++;
+            }
+
+            StringBuilder finalString = new StringBuilder();
+            finalString.append("\n---------------------------------------------------------\n");
+            finalString.append(String.format("| %-8s | %-10s | %-13s | %-13s |\n",
+                    "Game ID", "Game Name", "White Player", "Black Player"));
+
+            int num = 1;
+            for (GameData game : recentGameList) {
+                finalString.append(String.format("| %-8s | %-10s | %-13s | %-13s |\n",
+                        num,
+                        game.gameName(),
+                        game.whiteUsername() != null ? game.whiteUsername() : "AVAILABLE",
+                        game.blackUsername() != null ? game.blackUsername() : "AVAILABLE"));
+                num++;
+            }
+
+            finalString.append("---------------------------------------------------------\n");
+
+            return finalString.toString();
         } catch (Exception ex) {
-            return ex + " Unauthenticated error, please exit the program and log in again";
+            return "No games in database, create a new one to begin";
         }
     }
 

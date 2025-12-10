@@ -138,13 +138,20 @@ public class ServerFacadeTests {
         String result = client.listGames();
         assertEquals(
                 """
+                
                 ---------------------------------------------------------
-                | Game ID  |  Game Name |  White Player | Black Player  |
-                | 1        |  swag1     | AVAILABLE     | AVAILABLE     |
-                | 2        |  swag2     | AVAILABLE     | AVAILABLE     |
-                | 3        |  swag3     | AVAILABLE     | AVAILABLE     |
+                | Game ID  | Game Name  | White Player  | Black Player  |
+                | 1        | swag1      | AVAILABLE     | AVAILABLE     |
+                | 2        | swag2      | AVAILABLE     | AVAILABLE     |
+                | 3        | swag3      | AVAILABLE     | AVAILABLE     |
                 ---------------------------------------------------------
                 """, result);
+    }
+
+    @Test
+    void listGamesNegativeTest() throws ResponseException {
+        String result = client.listGames();
+        assertEquals("No games in database, create a new one to begin", result);
     }
 
 }
