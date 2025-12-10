@@ -54,6 +54,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             handleMakeMove(ctx, userGameCommand, move);
         } else if (userGameCommand.getCommandType() == UserGameCommand.CommandType.RESIGN) {
             handleResign(ctx, userGameCommand);
+        } else if (userGameCommand.getCommandType() == UserGameCommand.CommandType.LEAVE) {
+            handleLeave(ctx, userGameCommand);
         }
     }
 
@@ -143,6 +145,27 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         ServerMessage resignation = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
         resignation.setMessage(message);
         connections.broadcast(gameID, new Gson().toJson(resignation));
+    }
+
+    private void handleLeave(WsMessageContext ctx, UserGameCommand command) throws UnauthorizedException, BadRequestException, DataAccessException {
+        String token = command.getAuthToken();
+        int gameID = command.getGameID();
+
+        ChessGame.TeamColor leavingColor = userService.getPlayerColor(gameID, token);
+
+        String leavingName = null;
+        if (leavingColor == null) {
+            leavingName = "spectator left";
+        } else if (leavingColor.equals(ChessGame.TeamColor.WHITE)) {
+            leavingName = "white player left";
+        } else if (leavingColor.equals(ChessGame.TeamColor.BLACK)) {
+            leavingName = "black player left";
+        }
+
+        connections.remove(ctx.session);
+        ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
+        message.setMessage(leavingName);
+        connections.broadcastExcept(gameID, ctx.session, new Gson().toJson(message));
     }
 
     private void sendLoadGame(WsMessageContext ctx, ChessGame game) {
