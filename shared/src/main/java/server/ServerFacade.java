@@ -51,7 +51,9 @@ public class ServerFacade {
         var response = sendRequest(request);
 
         System.out.println("raw json: " + response.body());
-        return handleResponse(response, GameList.class);
+
+        GameListResponse wrapper = handleResponse(response, GameListResponse.class);
+        return wrapper.games();
     }
 
     public JoinResult joinGame(JoinRequest joinRequest, String authToken) throws ResponseException {
