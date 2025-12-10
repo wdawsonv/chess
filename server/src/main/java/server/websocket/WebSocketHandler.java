@@ -85,9 +85,27 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         String token = command.getAuthToken();
         int gameID = command.getGameID();
 
-        ChessGame game = userService.getGame(gameID, token);
+        ChessGame game = null;
+        try {
+            game = userService.getGame(gameID, token);
+        } catch (UnauthorizedException ex) {
+            sendError(ctx, "unauthorized: " + ex.getMessage());
+        }
+        System.out.println("Turn before move: " + game.getTeamTurn());
 
-        game.makeMove(move);
+        ChessGame.TeamColor userColor = userService.getPlayerColor(gameID, token);
+        ChessGame.TeamColor pieceColor = game.getBoard().getPiece(move.getStartPosition()).getTeamColor();
+
+        if (userColor != pieceColor || userColor == null) { //this is equals because piececolor has been updated but usercolor hasn't yet wahoo
+            sendError(ctx, "Error: don't move someone else's piece lol");
+            return;
+        }
+        try {
+            game.makeMove(move);
+        } catch (InvalidMoveException ex) {
+            sendError(ctx, "Invalid move: " + ex.getMessage());
+            return;
+        }
         userService.saveGame(gameID, game, token);
         sendLoadGame(ctx, game);
         sendNotificationNotToMe(gameID, ctx.session, "Move made: " + move.toString());

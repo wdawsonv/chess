@@ -133,20 +133,43 @@ public class MySqlDataAccess {
         return null;
     }
 
-    public GameData getChessGame(int gameID) throws DataAccessException {
+    public ChessGame getChessGame(int gameID) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "SELECT gameID, whiteUsername, blackUsername, gamename, json FROM games where gameID=?";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 ps.setInt(1, gameID);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
-                        return readGame(rs);
+                        String json = rs.getString("json");
+                        return new Gson().fromJson(json, ChessGame.class);
 
                     }
                 }
             }
         } catch (Exception e) {
             throw new DataAccessException(e.getMessage() + " BLAH!");
+        }
+        return null;
+    }
+
+    public ChessGame.TeamColor getPlayerColor(int gameID, String username) throws DataAccessException {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statementWhite = "SELECT whiteUsername FROM games where gameID=?";
+            try (PreparedStatement ps = conn.prepareStatement(statementWhite)) {
+                ps.setInt(1, gameID);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        //might have to make something like isNullWhite(rs) :P
+                        if (rs.getString("whiteUsername").equals(username)) {
+                            return ChessGame.TeamColor.WHITE;
+                        } else {
+                            return ChessGame.TeamColor.BLACK;
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new DataAccessException(e.getMessage() + " inside of getPlayerColor");
         }
         return null;
     }

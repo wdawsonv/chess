@@ -115,13 +115,27 @@ public class UserService {
     }
 
     private ChessGame getGame(int gameID) throws DataAccessException {
-        return mySqlDataAccess.getChessGame(gameID).game();
+        return mySqlDataAccess.getChessGame(gameID);
     }
 
     private void saveExistingGame(int gameID, ChessGame game) {
         mySqlDataAccess.updateExistingGame(gameID, game);
     }
 
+    public ChessGame.TeamColor getPlayerColor(int gameID, String authToken) throws BadRequestException, UnauthorizedException, DataAccessException {
+        if (getAuth(authToken) == null) {
+            throw new UnauthorizedException("unauthorized");
+        } else if (gameID == 0) {
+            throw new BadRequestException("you need a game iddddd :PPPP");
+        } else {
+            return getPlayerColorDatabase(gameID, authToken);
+        }
+    }
+
+    private ChessGame.TeamColor getPlayerColorDatabase(int gameID, String authToken) throws DataAccessException {
+        String username = getAuth(authToken).username();
+        return mySqlDataAccess.getPlayerColor(gameID, username);
+    }
 
     private CreateResult createNewGame(String gameName) throws DataAccessException, AlreadyTakenException {
         return mySqlDataAccess.createNewGame(gameName);
