@@ -116,6 +116,16 @@ public class MySqlDataAccess {
         executeUpdate(statement, auth.authToken());
     }
 
+    public void removePlayer(int gameID, ChessGame.TeamColor color) throws DataAccessException {
+        if (color.equals(ChessGame.TeamColor.WHITE)) {
+            var statement = "UPDATE games SET whiteUsername=NULL WHERE gameID=?";
+            executeUpdate(statement, gameID);
+        } else if (color.equals(ChessGame.TeamColor.BLACK)) {
+            var statement = "UPDATE games SET blackUsername=NULL WHERE gameID=?";
+            executeUpdate(statement, gameID);
+        }
+    }
+
     public UserData getUser(String username) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "SELECT username, password, email FROM users where username=?";
@@ -160,7 +170,7 @@ public class MySqlDataAccess {
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
                         //might have to make something like isNullWhite(rs) :P
-                        if (rs.getString("whiteUsername").equals(username)) {
+                        if (username.equals(rs.getString("whiteUsername"))) {
                             return ChessGame.TeamColor.WHITE;
                         }
                     }
@@ -172,7 +182,7 @@ public class MySqlDataAccess {
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
                         //might have to make something like isNullWhite(rs) :P
-                        if (rs.getString("blackUsername").equals(username)) {
+                        if (username.equals(rs.getString("blackUsername"))) {
                             return ChessGame.TeamColor.BLACK;
                         }
                     }

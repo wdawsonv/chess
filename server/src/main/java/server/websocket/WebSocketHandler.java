@@ -158,8 +158,10 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             leavingName = "spectator left";
         } else if (leavingColor.equals(ChessGame.TeamColor.WHITE)) {
             leavingName = "white player left";
+            userService.removePlayer(gameID, ChessGame.TeamColor.WHITE);
         } else if (leavingColor.equals(ChessGame.TeamColor.BLACK)) {
             leavingName = "black player left";
+            userService.removePlayer(gameID, ChessGame.TeamColor.BLACK);
         }
 
         connections.remove(ctx.session);

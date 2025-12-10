@@ -132,6 +132,14 @@ public class UserService {
         }
     }
 
+    public void removePlayer(int gameID, ChessGame.TeamColor color) throws DataAccessException {
+        removeSinglePlayer(gameID, color);
+    }
+
+    private void removeSinglePlayer(int gameID, ChessGame.TeamColor color) throws DataAccessException {
+        mySqlDataAccess.removePlayer(gameID, color);
+    }
+
     private ChessGame.TeamColor getPlayerColorDatabase(int gameID, String authToken) throws DataAccessException {
         String username = getAuth(authToken).username();
         return mySqlDataAccess.getPlayerColor(gameID, username);

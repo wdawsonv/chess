@@ -23,7 +23,11 @@ public class ConnectionManager {
     }
 
     public void remove(Session session) {
-        int gameID = sessionToGame.remove(session);
+        Integer gameID = sessionToGame.remove(session);
+        if (gameID == null) {
+            return;
+        }
+
         if (gameSessions.containsKey(gameID)) {
             gameSessions.get(gameID).remove(session);
         }
