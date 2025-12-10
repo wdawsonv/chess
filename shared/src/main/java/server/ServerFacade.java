@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import exception.ResponseException;
 import model.*;
 
+import java.lang.module.ResolutionException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -51,6 +52,12 @@ public class ServerFacade {
         return handleResponse(response, GameList.class);
     }
 
+    public JoinResult joinGame(JoinRequest joinRequest, String authToken) throws ResponseException {
+        var request = buildRequest("PUT", "/game", joinRequest, authToken);
+        var response = sendRequest(request);
+        return handleResponse(response, JoinResult.class);
+    }
+
     private HttpRequest buildRequest(String method, String path, Object body, String authToken) {
         var request = HttpRequest.newBuilder()
                 .uri(URI.create(serverUrl + path))
@@ -83,7 +90,6 @@ public class ServerFacade {
 
     private <T> T handleResponse(HttpResponse<String> response, Class<T> responseClass) throws ResponseException {
         var status = response.statusCode();
-        System.out.println("raw json: " + response.body());
         if (!isSuccessful(status)) {
             var body = response.body();
             if (body != null) {

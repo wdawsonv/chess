@@ -154,4 +154,31 @@ public class ServerFacadeTests {
         assertEquals("No games in database, create a new one to begin", result);
     }
 
+    @Test
+    void joinGamePositiveTest() throws ResponseException {
+        String[] params1 = new String[]{"username13", "password1", "email1"};
+        String[] params2 = new String[]{"1", "WHITE"};
+        client.register(params1);
+        client.createGame("swag1");
+        client.createGame("swag2");
+        client.createGame("swag3");
+        client.listGames();
+        String result = client.joinGame(params2);
+        assertEquals("Game 1 successfully joined", result);
+    }
+
+    @Test
+    void joinGameNegativeTest() throws ResponseException {
+        String[] params1 = new String[]{"username13", "password1", "email1"};
+        String[] params2 = new String[]{"1", "WHITE"};
+        client.register(params1);
+        client.createGame("swag1");
+        client.createGame("swag2");
+        client.createGame("swag3");
+        client.listGames();
+        client.joinGame(params2);
+        String result = client.joinGame(params2);
+        assertEquals("Unable to join that game/color, please try a different one", result);
+    }
+
 }

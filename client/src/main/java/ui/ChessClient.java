@@ -1,5 +1,6 @@
 package ui;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import model.*;
@@ -62,6 +63,7 @@ public class ChessClient {
                     case "logout" -> logout();
                     case "creategame" -> createGame(params);
                     case "listgames" -> listGames();
+                    case "playgame" -> joinGame(params);
                     default -> help();
                 };
             }
@@ -129,6 +131,28 @@ public class ChessClient {
             }
         }
         throw new ResponseException(ResponseException.Code.ClientError, "Please create a game with the format \"creategame [name]\"");
+    }
+
+    public String joinGame(String... params) throws  ResponseException {
+        if (params.length == 2) {
+            int placeholderId = Integer.parseInt(params[0]);
+            String teamColor = params[1].toUpperCase();
+            int realID;
+            try {
+                realID = idMatcher.get(placeholderId);
+            } catch (Exception ex) {
+                return "type listgames to see a list of available games to join";
+            }
+            JoinRequest joinRequest = new JoinRequest(teamColor, realID);
+
+            try {
+                JoinResult result = facade.joinGame(joinRequest, authToken);
+                return "Game " + params[0] + " successfully joined"; //then display the chungus board (white side if white black side if black)
+            } catch (Exception ex) {
+                return ex + " |||| Unable to join that game/color, please try a different one";
+            }
+        }
+        throw new ResponseException(ResponseException.Code.ClientError, "Please join a game with the format \"joingame [game ID] [WHITE/BLACK]\"");
     }
 
     public String listGames() throws ResponseException {
