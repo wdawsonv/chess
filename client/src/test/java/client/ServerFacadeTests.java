@@ -62,29 +62,23 @@ public class ServerFacadeTests {
         String[] params1 = new String[]{"username13", "password1", "email1"};
         String result = client.register(params1);
 
-        assertEquals("Successsfully logged in!", result);
+        assertEquals("Successfully registered and logged in as username13", result);
     }
 
     @Test
     void registerUserNegativeTest() throws Exception {
         String[] params1 = new String[]{"username14", "password1", "email1"};
-        String result = client.register(params1);
-        assertEquals("""
-                    logout - to leave
-                    creategame - to make a new game
-                    listgames - to see all running games
-                    playgame - to join a game
-                    observegame - to watch a game without playing
-                    help - displays possible commands
-                    """, result);
+        String[] params2 = new String[]{"username14", "password1", "email1"};
+        client.register(params1);
+        assertEquals("Username already taken", client.register(params2));
     }
 
     @Test
     void logoutPositiveTest() throws Exception {
         String[] params = new String[]{"username14", "password1", "email1"};
-        client.register(params);
+        String result = client.register(params);
 
-        assertDoesNotThrow(() -> client.logout());
+        assertEquals("Successfully logged out!", result);
     }
 
     @Test

@@ -3,6 +3,8 @@ package ui;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import model.LoginRequest;
+import model.LoginResult;
+import model.RegisterResult;
 import model.UserData;
 import server.ServerFacade;
 
@@ -74,16 +76,16 @@ public class ChessClient {
             String password = params[1];
             String email = params[2];
             UserData user = new UserData(username, password, email);
-            var result = new StringBuilder();
-            var gson = new Gson();
-            var output = facade.addUser(user);
-            result.append(gson.toJson(output));
 
-            this.state = State.POSTLOGIN;
-
-            return result.toString();
+            try {
+                RegisterResult result = facade.addUser(user);
+                this.state = State.POSTLOGIN;
+                return "Successfully registered and logged in as " + result.username();
+            } catch (Exception ex) {
+                return "Username already taken";
+            }
         }
-        throw new ResponseException(ResponseException.Code.ClientError, "wrong register parameter length");
+        throw new ResponseException(ResponseException.Code.ClientError, "Please register with the format \"register [username] [password] [email]");
     }
 
     public String login(String... params) throws ResponseException {
@@ -92,15 +94,16 @@ public class ChessClient {
             String password = params[1];
             LoginRequest request = new LoginRequest(username, password);
 
-            var result = new StringBuilder();
-            var gson = new Gson();
-            result.append(gson.toJson(facade.login(request)));
 
-            this.state = State.POSTLOGIN;
-
-            return result.toString();
+            try {
+                LoginResult result = facade.login(request);
+                this.state = State.POSTLOGIN;
+                return "Successfully logged in as " + result.username();
+            } catch (Exception ex) {
+                return "Invalid username/password";
+            }
         }
-        throw new ResponseException(ResponseException.Code.ClientError, "login failure");
+        throw new ResponseException(ResponseException.Code.ClientError, "Please login with the format \"login [username] [password]\"");
     }
 
     public String logout() throws ResponseException {
