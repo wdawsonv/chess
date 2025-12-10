@@ -8,6 +8,7 @@ import io.javalin.websocket.WsConnectContext;
 import io.javalin.websocket.WsConnectHandler;
 import io.javalin.websocket.WsMessageContext;
 import io.javalin.websocket.WsMessageHandler;
+import service.UserService;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
@@ -17,6 +18,11 @@ import java.io.IOException;
 public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
 
     private final ConnectionManager connections = new ConnectionManager();
+    private final UserService userService;
+
+    public WebSocketHandler(UserService userService) {
+        this.userService = userService;
+    }
 
     @Override
     public void handleConnect(WsConnectContext ctx) {
@@ -40,6 +46,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         connections.add(ctx.session);
         System.out.println("User joined game " + command.getGameID());
         ServerMessage response = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
+        ChessGame game = userService.
         response.setGame(new Object());
         ctx.send(new Gson().toJson(response));
 

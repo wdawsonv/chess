@@ -29,7 +29,7 @@ public class Server {
 
         this.service = service;
 
-        webSocketHandler = new WebSocketHandler();
+        webSocketHandler = new WebSocketHandler(service);
 
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
                 .post("/user", this::register)
