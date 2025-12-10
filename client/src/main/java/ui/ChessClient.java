@@ -1,6 +1,8 @@
 package ui;
 
+import chess.ChessBoard;
 import chess.ChessGame;
+import chess.ChessPiece;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import model.*;
@@ -38,7 +40,7 @@ public class ChessClient {
                 if (result == null) {
                     result = "";
                 }
-                System.out.print(BLUE + result);
+                System.out.print(SET_TEXT_COLOR_BLUE + result);
             } catch (Throwable e) {
                 System.out.print(e.toString());
             }
@@ -147,13 +149,104 @@ public class ChessClient {
 
             try {
                 JoinResult result = facade.joinGame(joinRequest, authToken);
-                return "Game " + params[0] + " successfully joined"; //then display the chungus board (white side if white black side if black)
+                state = State.GAMEPLAY;
+                return "Game " + params[0] + " successfully joined\n" +
+                        displayGameWhite(getGameFromId(realID)); //then display the chungus board (white side if white black side if black)
             } catch (Exception ex) {
-                return ex + " |||| Unable to join that game/color, please try a different one";
+                return "Unable to join that game/color, please try a different one";
             }
         }
         throw new ResponseException(ResponseException.Code.ClientError, "Please join a game with the format \"joingame [game ID] [WHITE/BLACK]\"");
     }
+
+    private ChessGame getGameFromId(int gameID) {
+        for (GameData game : recentGameList) {
+            if (game.gameID() == gameID) {
+                return game.game();
+            }
+        }
+        return null;
+    }
+
+    private String displayGameWhite(ChessGame game) {
+        StringBuilder display = new StringBuilder();
+        ChessBoard board = game.getBoard();
+        ChessPiece[][] squares = board.squares;
+
+        //10 by 10 grid, top down right to left
+        for (int row = 9; row >= 0; row--) {
+            for (int col = 0; col < 10; col++) {
+                if (row == 0 || row == 9 || col == 0 || col == 9) {
+                    display.append(SET_BG_COLOR_LIGHT_GREY);
+
+                    //put all outside logic in here
+                    if ((row == 9 && col > 0 && col < 9) || (row == 0 && col > 0 && col < 9) ) {
+                        String colVal = switch (col) {
+                            case 1 -> "A ";
+                            case 2 -> "  B ";
+                            case 3 -> "  C ";
+                            case 4 -> "  D ";
+                            case 5 -> " E ";
+                            case 6 -> "  F ";
+                            case 7 -> "  G ";
+                            case 8 -> "  H";
+                            default -> "";
+                        };
+                        display.append(colVal);
+                    } else if ((col == 9 && row > 0 && row < 9) || (col == 0 && row > 0 && row < 9) ) {
+                        String rowVal = switch (row) {
+                            case 1 -> " 1 ";
+                            case 2 -> " 2 ";
+                            case 3 -> " 3 ";
+                            case 4 -> " 4 ";
+                            case 5 -> " 5 ";
+                            case 6 -> " 6 ";
+                            case 7 -> " 7 ";
+                            case 8 -> " 8 ";
+                            default -> "";
+                        };
+                        display.append(rowVal);
+                    } else {
+                        display.append(EMPTY);
+                    }
+                } else {
+                    int shiftRow = row - 1;
+                    int shiftCol = col - 1;
+
+                    if ((shiftRow + shiftCol) % 2 == 1) {
+                        display.append(SET_BG_COLOR_DARK_GREY);
+                    } else {
+                        display.append(SET_BG_COLOR_BLACK);
+                    }
+
+
+                    ChessPiece piece = squares[7 - shiftRow][shiftCol];
+
+                    if (piece == null) {
+                        display.append(EMPTY);
+                    } else {
+                        display.append(pieceSymbol(piece));
+                    }
+                }
+
+                display.append(RESET_BG_COLOR);
+            }
+            display.append("\n");
+        }
+        return display.toString();
+    }
+
+    private String pieceSymbol(ChessPiece piece) {
+        return switch (piece.getPieceType()) {
+            case KING -> (piece.getTeamColor() == ChessGame.TeamColor.WHITE) ? WHITE_KING : BLACK_KING;
+            case QUEEN -> (piece.getTeamColor() == ChessGame.TeamColor.WHITE) ? WHITE_QUEEN : BLACK_QUEEN;
+            case ROOK -> (piece.getTeamColor() == ChessGame.TeamColor.WHITE) ? WHITE_ROOK : BLACK_ROOK;
+            case BISHOP -> (piece.getTeamColor() == ChessGame.TeamColor.WHITE) ? WHITE_BISHOP : BLACK_BISHOP;
+            case KNIGHT -> (piece.getTeamColor() == ChessGame.TeamColor.WHITE) ? WHITE_KNIGHT : BLACK_KNIGHT;
+            case PAWN -> (piece.getTeamColor() == ChessGame.TeamColor.WHITE) ? WHITE_PAWN : BLACK_PAWN;
+        };
+    }
+
 
     public String listGames() throws ResponseException {
 
@@ -213,6 +306,6 @@ public class ChessClient {
     }
 
     private void printPrompt() {
-        System.out.print("\n" + RESET + ">>>" + GREEN);
+        System.out.print("\n" + RESET_TEXT_COLOR + SET_TEXT_BLINKING + ">>>" + RESET_TEXT_BLINKING);
     }
 }
