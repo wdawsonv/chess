@@ -18,6 +18,8 @@ public class PieceMovesCalculator {
             return queenMoves(board, myPosition);
         } else if (piece.getPieceType() == ChessPiece.PieceType.KNIGHT) {
             return knightMoves(board, myPosition);
+        } else if (piece.getPieceType() == ChessPiece.PieceType.KING) {
+            return kingMoves(board, myPosition);
         }
 
         return List.of();
@@ -69,6 +71,37 @@ public class PieceMovesCalculator {
                 new ChessPosition(row-1, col-2),
                 new ChessPosition(row-2, col-1)
                 ));
+
+        for (ChessPosition endPosition : theoreticalEndPositions) {
+            if (isInBounds(endPosition)) {
+                if (board.getPiece(endPosition) == null) {
+                    finalMoveList.add(new ChessMove(myPosition, endPosition, null));
+                } else {
+                    if (canCapture(board, myPosition, endPosition)) {
+                        finalMoveList.add(new ChessMove(myPosition, endPosition, null));
+                    }
+                }
+            }
+        }
+
+        return finalMoveList;
+    }
+
+    private static Collection<ChessMove> kingMoves(ChessBoard board, ChessPosition myPosition) {
+        Collection<ChessMove> finalMoveList = new ArrayList<>();
+        int row = myPosition.getRow();
+        int col = myPosition.getColumn();
+
+        Collection<ChessPosition> theoreticalEndPositions = new ArrayList<>();
+
+        for (int i = row-1; i <= row+1; i++) {
+            for (int j = col-1; j <= col+1; j++) {
+                if (i == row && j == col) {
+                    continue;
+                }
+                theoreticalEndPositions.add(new ChessPosition(i, j));
+            }
+        }
 
         for (ChessPosition endPosition : theoreticalEndPositions) {
             if (isInBounds(endPosition)) {
