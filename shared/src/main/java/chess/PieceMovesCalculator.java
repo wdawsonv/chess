@@ -12,6 +12,12 @@ public class PieceMovesCalculator {
 
         if (piece.getPieceType() == ChessPiece.PieceType.BISHOP) {
             return bishopMoves(board, myPosition);
+        } else if (piece.getPieceType() == ChessPiece.PieceType.ROOK) {
+            return rookMoves(board, myPosition);
+        } else if (piece.getPieceType() == ChessPiece.PieceType.QUEEN) {
+            return queenMoves(board, myPosition);
+        } else if (piece.getPieceType() == ChessPiece.PieceType.KNIGHT) {
+            return knightMoves(board, myPosition);
         }
 
         return List.of();
@@ -24,6 +30,57 @@ public class PieceMovesCalculator {
         finalMoveList.addAll(diagUpRightMoves(board, myPosition));
         finalMoveList.addAll(diagDownLeftMoves(board, myPosition));
         finalMoveList.addAll(diagDownRightMoves(board, myPosition));
+
+        return finalMoveList;
+    }
+
+    private static Collection<ChessMove> rookMoves(ChessBoard board, ChessPosition myPosition) {
+        Collection<ChessMove> finalMoveList = new ArrayList<>();
+
+        finalMoveList.addAll(upMoves(board, myPosition));
+        finalMoveList.addAll(downMoves(board, myPosition));
+        finalMoveList.addAll(rightMoves(board, myPosition));
+        finalMoveList.addAll(leftMoves(board, myPosition));
+
+        return finalMoveList;
+    }
+
+    private static Collection<ChessMove> queenMoves(ChessBoard board, ChessPosition myPosition) {
+        Collection<ChessMove> finalMoveList = new ArrayList<>();
+
+        finalMoveList.addAll(bishopMoves(board, myPosition));
+        finalMoveList.addAll(rookMoves(board, myPosition));
+
+        return finalMoveList;
+    }
+
+    private static Collection<ChessMove> knightMoves(ChessBoard board, ChessPosition myPosition) {
+        Collection<ChessMove> finalMoveList = new ArrayList<>();
+        int row = myPosition.getRow();
+        int col = myPosition.getColumn();
+
+        Collection<ChessPosition> theoreticalEndPositions = new ArrayList<>(List.of(
+                new ChessPosition(row+1, col+2),
+                new ChessPosition(row+2, col+1),
+                new ChessPosition(row-1, col+2),
+                new ChessPosition(row-2, col+1),
+                new ChessPosition(row+1, col-2),
+                new ChessPosition(row+2, col-1),
+                new ChessPosition(row-1, col-2),
+                new ChessPosition(row-2, col-1)
+                ));
+
+        for (ChessPosition endPosition : theoreticalEndPositions) {
+            if (isInBounds(endPosition)) {
+                if (board.getPiece(endPosition) == null) {
+                    finalMoveList.add(new ChessMove(myPosition, endPosition, null));
+                } else {
+                    if (canCapture(board, myPosition, endPosition)) {
+                        finalMoveList.add(new ChessMove(myPosition, endPosition, null));
+                    }
+                }
+            }
+        }
 
         return finalMoveList;
     }
@@ -123,10 +180,107 @@ public class PieceMovesCalculator {
         return tempMoveList;
     }
 
+    //Cardinal Move Checkers
+    private static Collection<ChessMove> upMoves(ChessBoard board, ChessPosition myPosition) {
+
+        int testRow = myPosition.getRow() + 1;
+        int testCol = myPosition.getColumn();
+        Collection<ChessMove> tempMoveList = new ArrayList<>();
+
+        while (testRow <= 8) {
+            ChessPosition testEndPosition = new ChessPosition(testRow, testCol);
+            ChessMove possibleMove = new ChessMove(myPosition, testEndPosition, null);
+
+            if (board.getPiece(testEndPosition) == null) {
+                tempMoveList.add(possibleMove);
+            } else {
+                if (canCapture(board, myPosition, testEndPosition)) {
+                    tempMoveList.add(possibleMove);
+                }
+                break;
+            }
+            testRow++;
+        }
+
+        return tempMoveList;
+    }
+    private static Collection<ChessMove> downMoves(ChessBoard board, ChessPosition myPosition) {
+
+        int testRow = myPosition.getRow() - 1;
+        int testCol = myPosition.getColumn();
+        Collection<ChessMove> tempMoveList = new ArrayList<>();
+
+        while (testRow >= 1) {
+            ChessPosition testEndPosition = new ChessPosition(testRow, testCol);
+            ChessMove possibleMove = new ChessMove(myPosition, testEndPosition, null);
+
+            if (board.getPiece(testEndPosition) == null) {
+                tempMoveList.add(possibleMove);
+            } else {
+                if (canCapture(board, myPosition, testEndPosition)) {
+                    tempMoveList.add(possibleMove);
+                }
+                break;
+            }
+            testRow--;
+        }
+
+        return tempMoveList;
+    }
+    private static Collection<ChessMove> leftMoves(ChessBoard board, ChessPosition myPosition) {
+
+        int testRow = myPosition.getRow();
+        int testCol = myPosition.getColumn() - 1;
+        Collection<ChessMove> tempMoveList = new ArrayList<>();
+
+        while (testCol >= 1) {
+            ChessPosition testEndPosition = new ChessPosition(testRow, testCol);
+            ChessMove possibleMove = new ChessMove(myPosition, testEndPosition, null);
+
+            if (board.getPiece(testEndPosition) == null) {
+                tempMoveList.add(possibleMove);
+            } else {
+                if (canCapture(board, myPosition, testEndPosition)) {
+                    tempMoveList.add(possibleMove);
+                }
+                break;
+            }
+            testCol--;
+        }
+
+        return tempMoveList;
+    }
+    private static Collection<ChessMove> rightMoves(ChessBoard board, ChessPosition myPosition) {
+
+        int testRow = myPosition.getRow();
+        int testCol = myPosition.getColumn() + 1;
+        Collection<ChessMove> tempMoveList = new ArrayList<>();
+
+        while (testCol <= 8) {
+            ChessPosition testEndPosition = new ChessPosition(testRow, testCol);
+            ChessMove possibleMove = new ChessMove(myPosition, testEndPosition, null);
+
+            if (board.getPiece(testEndPosition) == null) {
+                tempMoveList.add(possibleMove);
+            } else {
+                if (canCapture(board, myPosition, testEndPosition)) {
+                    tempMoveList.add(possibleMove);
+                }
+                break;
+            }
+            testCol++;
+        }
+
+        return tempMoveList;
+    }
+
     //General Helpers
     private static boolean canCapture(ChessBoard board, ChessPosition myPosition, ChessPosition testEndPosition) {
         ChessGame.TeamColor myColor = board.getPiece(myPosition).getTeamColor();
         ChessGame.TeamColor otherColor = board.getPiece(testEndPosition).getTeamColor();
         return (myColor != otherColor);
+    }
+    private static boolean isInBounds(ChessPosition myPosition) {
+        return (myPosition.getColumn() <= 8 && myPosition.getColumn() >= 1 && myPosition.getRow() <= 8 && myPosition.getRow() >= 1);
     }
 }
