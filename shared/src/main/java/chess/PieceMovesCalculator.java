@@ -20,6 +20,8 @@ public class PieceMovesCalculator {
             return knightMoves(board, myPosition);
         } else if (piece.getPieceType() == ChessPiece.PieceType.KING) {
             return kingMoves(board, myPosition);
+        } else if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
+            return pawnMoves(board, myPosition);
         }
 
         return List.of();
@@ -114,6 +116,15 @@ public class PieceMovesCalculator {
                 }
             }
         }
+
+        return finalMoveList;
+    }
+
+    private static Collection<ChessMove> pawnMoves(ChessBoard board, ChessPosition myPosition) {
+        Collection<ChessMove> finalMoveList = new ArrayList<>();
+
+        finalMoveList.addAll(pawnForwardMoves(board, myPosition));
+        finalMoveList.addAll(pawnCaptureMoves(board, myPosition));
 
         return finalMoveList;
     }
@@ -315,5 +326,101 @@ public class PieceMovesCalculator {
     }
     private static boolean isInBounds(ChessPosition myPosition) {
         return (myPosition.getColumn() <= 8 && myPosition.getColumn() >= 1 && myPosition.getRow() <= 8 && myPosition.getRow() >= 1);
+    }
+
+    //Pawn Checkers
+    private static Collection<ChessMove> pawnForwardMoves(ChessBoard board, ChessPosition myPosition) {
+        Collection<ChessMove> tempMoveList = new ArrayList<>();
+
+        int row = myPosition.getRow();
+        int col = myPosition.getColumn();
+        if (board.getPiece(myPosition).getTeamColor() == ChessGame.TeamColor.WHITE) {
+            if (board.getPiece(new ChessPosition(row+1, col)) == null) {
+                tempMoveList.addAll(pawnPromotionAdder(board, myPosition, new ChessPosition(row+1, col)));
+
+                //check if it's the first move
+                if (row == 2) {
+                    if (board.getPiece(new ChessPosition(row+2, col)) == null) {
+                        tempMoveList.add(new ChessMove(myPosition, new ChessPosition(row+2, col), null));
+                    }
+                }
+            }
+        } else {
+            if (board.getPiece(new ChessPosition(row-1, col)) == null) {
+                tempMoveList.addAll(pawnPromotionAdder(board, myPosition, new ChessPosition(row-1, col)));
+
+                //check if it's the first move
+                if (row == 7) {
+                    if (board.getPiece(new ChessPosition(row+2, col)) == null) {
+                        tempMoveList.add(new ChessMove(myPosition, new ChessPosition(row-2, col), null));
+                    }
+                }
+            }
+        }
+
+        return tempMoveList;
+    }
+    private static Collection<ChessMove> pawnCaptureMoves(ChessBoard board, ChessPosition myPosition) {
+        Collection<ChessMove> tempMoveList = new ArrayList<>();
+        int row = myPosition.getRow();
+        int col = myPosition.getColumn();
+
+        //sort by team color
+        if (board.getPiece(myPosition).getTeamColor() == ChessGame.TeamColor.WHITE) {
+
+            //make possible moves here
+            Collection<ChessPosition> possibleCapturePositions = new ArrayList<>(List.of(
+                    new ChessPosition(row+1, col+1),
+                    new ChessPosition(row+1, col-1)
+                    ));
+
+            //go through them and DON'T CRASH IF IT'S NULL 4head
+            for (ChessPosition endPosition : possibleCapturePositions) {
+                if (board.getPiece(endPosition) == null) {
+                    continue;
+                }
+                if (canCapture(board, myPosition, endPosition)) {
+                    tempMoveList.addAll(pawnPromotionAdder(board, myPosition, endPosition));
+                }
+            }
+        } else if (board.getPiece(myPosition).getTeamColor() == ChessGame.TeamColor.BLACK) {
+            Collection<ChessPosition> possibleCapturePositions = new ArrayList<>(List.of(
+                    new ChessPosition(row-1, col+1),
+                    new ChessPosition(row-1, col-1)
+            ));
+
+            for (ChessPosition endPosition : possibleCapturePositions) {
+                if (board.getPiece(endPosition) == null) {
+                    continue;
+                }
+                if (canCapture(board, myPosition, endPosition)) {
+                    tempMoveList.addAll(pawnPromotionAdder(board, myPosition, endPosition));
+                }
+            }
+        }
+
+        return tempMoveList;
+    }
+    private static Collection<ChessMove> pawnPromotionAdder(ChessBoard board, ChessPosition myPosition, ChessPosition endPosition) {
+        Collection<ChessMove> tempMoveList = new ArrayList<>();
+
+        if (board.getPiece(myPosition).getTeamColor() == ChessGame.TeamColor.WHITE && endPosition.getRow() == 8) {
+            tempMoveList.addAll(List.of(
+                    new ChessMove(myPosition, endPosition, ChessPiece.PieceType.QUEEN),
+                    new ChessMove(myPosition, endPosition, ChessPiece.PieceType.KNIGHT),
+                    new ChessMove(myPosition, endPosition, ChessPiece.PieceType.ROOK),
+                    new ChessMove(myPosition, endPosition, ChessPiece.PieceType.BISHOP)
+                    ));
+        } else if (board.getPiece(myPosition).getTeamColor() == ChessGame.TeamColor.BLACK && endPosition.getRow() == 1) {
+            tempMoveList.addAll(List.of(
+                    new ChessMove(myPosition, endPosition, ChessPiece.PieceType.QUEEN),
+                    new ChessMove(myPosition, endPosition, ChessPiece.PieceType.KNIGHT),
+                    new ChessMove(myPosition, endPosition, ChessPiece.PieceType.ROOK),
+                    new ChessMove(myPosition, endPosition, ChessPiece.PieceType.BISHOP)
+                    ));
+        } else {
+            tempMoveList.add(new ChessMove(myPosition, endPosition, null));
+        }
+        return tempMoveList;
     }
 }
