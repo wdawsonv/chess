@@ -75,6 +75,7 @@ public class ChessPiece {
 
     //Diagonal Move Checkers
     private Collection<ChessMove> diagUpLeftMoves(ChessBoard board, ChessPosition myPosition) {
+
         int testRow = myPosition.getRow() + 1;
         int testCol = myPosition.getColumn() - 1;
         Collection<ChessMove> tempMoveList = new ArrayList<>();
@@ -85,6 +86,11 @@ public class ChessPiece {
 
             if (board.getPiece(testEndPosition) == null) {
                 tempMoveList.add(possibleMove);
+            } else {
+                if (canCapture(board, myPosition, testEndPosition)) {
+                    tempMoveList.add(possibleMove);
+                }
+                break;
             }
             testRow++;
             testCol--;
@@ -103,6 +109,11 @@ public class ChessPiece {
 
             if (board.getPiece(testEndPosition) == null) {
                 tempMoveList.add(possibleMove);
+            } else {
+                if (canCapture(board, myPosition, testEndPosition)) {
+                    tempMoveList.add(possibleMove);
+                }
+                break;
             }
             testRow++;
             testCol++;
@@ -121,6 +132,11 @@ public class ChessPiece {
 
             if (board.getPiece(testEndPosition) == null) {
                 tempMoveList.add(possibleMove);
+            } else {
+                if (canCapture(board, myPosition, testEndPosition)) {
+                    tempMoveList.add(possibleMove);
+                }
+                break;
             }
             testRow--;
             testCol--;
@@ -139,11 +155,23 @@ public class ChessPiece {
 
             if (board.getPiece(testEndPosition) == null) {
                 tempMoveList.add(possibleMove);
+            } else {
+                if (canCapture(board, myPosition, testEndPosition)) {
+                    tempMoveList.add(possibleMove);
+                }
+                break;
             }
             testRow--;
             testCol++;
         }
 
         return tempMoveList;
+    }
+
+    //General Helpers
+    private boolean canCapture(ChessBoard board, ChessPosition myPosition, ChessPosition testEndPosition) {
+        ChessGame.TeamColor myColor = board.getPiece(myPosition).pieceColor;
+        ChessGame.TeamColor otherColor = board.getPiece(testEndPosition).pieceColor;
+        return (myColor != otherColor);
     }
 }
