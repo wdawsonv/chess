@@ -362,40 +362,32 @@ public class PieceMovesCalculator {
     }
     private static Collection<ChessMove> pawnCaptureMoves(ChessBoard board, ChessPosition myPosition) {
         Collection<ChessMove> tempMoveList = new ArrayList<>();
+        Collection<ChessPosition> possibleCapturePositions = new ArrayList<>();
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
 
-        //sort by team color
+        //sort by team color & add possible moves
         if (board.getPiece(myPosition).getTeamColor() == ChessGame.TeamColor.WHITE) {
-
-            //make possible moves here
-            Collection<ChessPosition> possibleCapturePositions = new ArrayList<>(List.of(
+            possibleCapturePositions.addAll(List.of(
                     new ChessPosition(row+1, col+1),
                     new ChessPosition(row+1, col-1)
                     ));
-
-            //go through them and DON'T CRASH IF IT'S NULL 4head
-            for (ChessPosition endPosition : possibleCapturePositions) {
-                if (board.getPiece(endPosition) == null) {
-                    continue;
-                }
-                if (canCapture(board, myPosition, endPosition)) {
-                    tempMoveList.addAll(pawnPromotionAdder(board, myPosition, endPosition));
-                }
-            }
         } else if (board.getPiece(myPosition).getTeamColor() == ChessGame.TeamColor.BLACK) {
-            Collection<ChessPosition> possibleCapturePositions = new ArrayList<>(List.of(
+            possibleCapturePositions.addAll(List.of(
                     new ChessPosition(row-1, col+1),
                     new ChessPosition(row-1, col-1)
             ));
+        }
 
-            for (ChessPosition endPosition : possibleCapturePositions) {
-                if (board.getPiece(endPosition) == null) {
-                    continue;
-                }
-                if (canCapture(board, myPosition, endPosition)) {
-                    tempMoveList.addAll(pawnPromotionAdder(board, myPosition, endPosition));
-                }
+        for (ChessPosition endPosition : possibleCapturePositions) {
+            if (col < 1 || col > 8) {
+                continue;
+            }
+            if (board.getPiece(endPosition) == null) {
+                continue;
+            }
+            if (canCapture(board, myPosition, endPosition)) {
+                tempMoveList.addAll(pawnPromotionAdder(board, myPosition, endPosition));
             }
         }
 
