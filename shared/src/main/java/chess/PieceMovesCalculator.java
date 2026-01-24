@@ -384,6 +384,7 @@ public class PieceMovesCalculator {
                 continue;
             }
             if (board.getPiece(endPosition) == null) {
+                continue;
             }
             if (canCapture(board, myPosition, endPosition)) {
                 tempMoveList.addAll(pawnPromotionAdder(board, myPosition, endPosition));
