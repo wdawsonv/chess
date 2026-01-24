@@ -59,7 +59,6 @@ public class PieceMovesCalculator {
     }
 
     private static Collection<ChessMove> knightMoves(ChessBoard board, ChessPosition myPosition) {
-        Collection<ChessMove> finalMoveList = new ArrayList<>();
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
 
@@ -74,23 +73,10 @@ public class PieceMovesCalculator {
                 new ChessPosition(row-2, col-1)
                 ));
 
-        for (ChessPosition endPosition : theoreticalEndPositions) {
-            if (isInBounds(endPosition)) {
-                if (board.getPiece(endPosition) == null) {
-                    finalMoveList.add(new ChessMove(myPosition, endPosition, null));
-                } else {
-                    if (canCapture(board, myPosition, endPosition)) {
-                        finalMoveList.add(new ChessMove(myPosition, endPosition, null));
-                    }
-                }
-            }
-        }
-
-        return finalMoveList;
+        return addPossibleMoves(board, myPosition, theoreticalEndPositions);
     }
 
     private static Collection<ChessMove> kingMoves(ChessBoard board, ChessPosition myPosition) {
-        Collection<ChessMove> finalMoveList = new ArrayList<>();
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
 
@@ -105,19 +91,7 @@ public class PieceMovesCalculator {
             }
         }
 
-        for (ChessPosition endPosition : theoreticalEndPositions) {
-            if (isInBounds(endPosition)) {
-                if (board.getPiece(endPosition) == null) {
-                    finalMoveList.add(new ChessMove(myPosition, endPosition, null));
-                } else {
-                    if (canCapture(board, myPosition, endPosition)) {
-                        finalMoveList.add(new ChessMove(myPosition, endPosition, null));
-                    }
-                }
-            }
-        }
-
-        return finalMoveList;
+        return addPossibleMoves(board, myPosition, theoreticalEndPositions);
     }
 
     private static Collection<ChessMove> pawnMoves(ChessBoard board, ChessPosition myPosition) {
@@ -326,6 +300,23 @@ public class PieceMovesCalculator {
     }
     private static boolean isInBounds(ChessPosition myPosition) {
         return (myPosition.getColumn() <= 8 && myPosition.getColumn() >= 1 && myPosition.getRow() <= 8 && myPosition.getRow() >= 1);
+    }
+    private static Collection<ChessMove> addPossibleMoves(ChessBoard board, ChessPosition myPosition, Collection<ChessPosition> endPositions) {
+        Collection<ChessMove> availableMoveList = new ArrayList<>();
+
+        for (ChessPosition endPosition : endPositions) {
+            if (isInBounds(endPosition)) {
+                if (board.getPiece(endPosition) == null) {
+                    availableMoveList.add(new ChessMove(myPosition, endPosition, null));
+                } else {
+                    if (canCapture(board, myPosition, endPosition)) {
+                        availableMoveList.add(new ChessMove(myPosition, endPosition, null));
+                    }
+                }
+            }
+        }
+
+        return availableMoveList;
     }
 
     //Pawn Checkers
