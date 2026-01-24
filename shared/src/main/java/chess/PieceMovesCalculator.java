@@ -351,7 +351,7 @@ public class PieceMovesCalculator {
 
                 //check if it's the first move
                 if (row == 7) {
-                    if (board.getPiece(new ChessPosition(row+2, col)) == null) {
+                    if (board.getPiece(new ChessPosition(row-2, col)) == null) {
                         tempMoveList.add(new ChessMove(myPosition, new ChessPosition(row-2, col), null));
                     }
                 }
@@ -380,7 +380,7 @@ public class PieceMovesCalculator {
         }
 
         for (ChessPosition endPosition : possibleCapturePositions) {
-            if (col < 1 || col > 8) {
+            if (endPosition.getColumn() < 1 || endPosition.getColumn() > 8) {
                 continue;
             }
             if (board.getPiece(endPosition) == null) {
