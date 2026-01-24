@@ -387,14 +387,8 @@ public class PieceMovesCalculator {
     private static Collection<ChessMove> pawnPromotionAdder(ChessBoard board, ChessPosition myPosition, ChessPosition endPosition) {
         Collection<ChessMove> tempMoveList = new ArrayList<>();
 
-        if (board.getPiece(myPosition).getTeamColor() == ChessGame.TeamColor.WHITE && endPosition.getRow() == 8) {
-            tempMoveList.addAll(List.of(
-                    new ChessMove(myPosition, endPosition, ChessPiece.PieceType.QUEEN),
-                    new ChessMove(myPosition, endPosition, ChessPiece.PieceType.KNIGHT),
-                    new ChessMove(myPosition, endPosition, ChessPiece.PieceType.ROOK),
-                    new ChessMove(myPosition, endPosition, ChessPiece.PieceType.BISHOP)
-                    ));
-        } else if (board.getPiece(myPosition).getTeamColor() == ChessGame.TeamColor.BLACK && endPosition.getRow() == 1) {
+        if (board.getPiece(myPosition).getTeamColor() == ChessGame.TeamColor.WHITE && endPosition.getRow() == 8
+            || board.getPiece(myPosition).getTeamColor() == ChessGame.TeamColor.BLACK && endPosition.getRow() == 1) {
             tempMoveList.addAll(List.of(
                     new ChessMove(myPosition, endPosition, ChessPiece.PieceType.QUEEN),
                     new ChessMove(myPosition, endPosition, ChessPiece.PieceType.KNIGHT),
