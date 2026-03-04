@@ -52,12 +52,9 @@ public class ChessGame {
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         ChessPiece myPiece = gameBoard.getPiece(startPosition);
+        if (myPiece == null) {return null;}
 
-        if (myPiece == null) {
-            return null;
-        } else {
-            return myPiece.pieceMoves(gameBoard, startPosition);
-        }
+        return null; //TEMP!!!
     }
 
     /**
@@ -92,23 +89,48 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        if (teamColor == TeamColor.WHITE) {
-            TeamColor enemyColor = TeamColor.BLACK;
-        } else {
-            TeamColor enemyColor = TeamColor.WHITE;
-        }
 
+        ChessPosition myKingPosition = findKingPosition(teamColor);
         boolean isChecked = false;
 
         for (int i=0; i<9; i++) {
             for (int j=0; j<9; j++) {
                 ChessPosition testStartPosition = new ChessPosition(i, j);
-//                if (gameBoard.getPiece(testStartPosition))
+                ChessPiece testPiece = gameBoard.getPiece(testStartPosition);
+
+                if (testPiece == null) {continue;}
+                if (testPiece.getTeamColor() == teamColor) {continue;}
+
+                Collection<ChessMove> enemyPieceMoves = testPiece.pieceMoves(gameBoard, testStartPosition);
+
+                for (ChessMove move : enemyPieceMoves) {
+                    if (move.getEndPosition() == myKingPosition) {
+                        isChecked = true;
+                    }
+                }
+
+
             }
         }
-        //check if opponent piece -> check if that move to the king's position is valid ->
-        //check all opponents moves
-        throw new RuntimeException("Not implemented");
+
+        return isChecked;
+    }
+
+    private ChessPosition findKingPosition(TeamColor teamColor) {
+        for (int i=0; i<9; i++) {
+            for (int j=0; j<9; j++) {
+                ChessPosition possiblePosition = new ChessPosition(i, j);
+
+                if (gameBoard.getPiece(possiblePosition) == null) {continue;}
+                if (gameBoard.getPiece(possiblePosition).getPieceType() == ChessPiece.PieceType.KING &&
+                        gameBoard.getPiece(possiblePosition).getTeamColor() == teamColor) {
+                    return possiblePosition;
+                }
+
+            }
+        }
+
+        return null;
     }
 
     /**
