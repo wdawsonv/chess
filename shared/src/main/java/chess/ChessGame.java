@@ -69,6 +69,7 @@ public class ChessGame {
             }
 
             gameBoard.addPiece(endPos, myPiece);
+            gameBoard.addPiece(startPos, null);
             if (!isInCheck(myColor)) {
                 verifiedMoves.add(move);
             }
@@ -128,7 +129,8 @@ public class ChessGame {
                 Collection<ChessMove> enemyPieceMoves = testPiece.pieceMoves(gameBoard, testStartPosition);
 
                 for (ChessMove move : enemyPieceMoves) {
-                    if (move.getEndPosition() == myKingPosition) {
+                    ChessPosition enemyMoveEnd = move.getEndPosition();
+                    if (enemyMoveEnd.equals(myKingPosition)) {
                         isChecked = true;
                     }
                 }
