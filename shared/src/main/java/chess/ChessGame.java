@@ -1,5 +1,6 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -53,8 +54,30 @@ public class ChessGame {
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         ChessPiece myPiece = gameBoard.getPiece(startPosition);
         if (myPiece == null) {return null;}
+        TeamColor myColor = myPiece.getTeamColor();
 
-        return null; //TEMP!!!
+        Collection<ChessMove> allMoves = myPiece.pieceMoves(gameBoard, startPosition);
+        Collection<ChessMove> verifiedMoves = new ArrayList<>();
+
+        for (ChessMove move : allMoves) {
+            ChessPiece victimPiece = null;
+            ChessPosition startPos = move.getStartPosition();
+            ChessPosition endPos = move.getEndPosition();
+
+            if (gameBoard.getPiece(endPos) != null) {
+                victimPiece = gameBoard.getPiece(endPos);
+            }
+
+            gameBoard.addPiece(endPos, myPiece);
+            if (!isInCheck(myColor)) {
+                verifiedMoves.add(move);
+            }
+
+            gameBoard.addPiece(startPos, myPiece);
+            gameBoard.addPiece(endPos, victimPiece);
+        }
+
+        return verifiedMoves;
     }
 
     /**
@@ -66,6 +89,7 @@ public class ChessGame {
     public void makeMove(ChessMove move) throws InvalidMoveException {
         ChessPosition start = move.getStartPosition();
         ChessPosition end = move.getEndPosition();
+        ChessPiece.PieceType promPiece = move.getPromotionPiece();
         ChessPiece piece = gameBoard.getPiece(start);
 
         if (piece == null) {
@@ -93,8 +117,8 @@ public class ChessGame {
         ChessPosition myKingPosition = findKingPosition(teamColor);
         boolean isChecked = false;
 
-        for (int i=0; i<9; i++) {
-            for (int j=0; j<9; j++) {
+        for (int i=1; i<9; i++) {
+            for (int j=1; j<9; j++) {
                 ChessPosition testStartPosition = new ChessPosition(i, j);
                 ChessPiece testPiece = gameBoard.getPiece(testStartPosition);
 
@@ -117,8 +141,8 @@ public class ChessGame {
     }
 
     private ChessPosition findKingPosition(TeamColor teamColor) {
-        for (int i=0; i<9; i++) {
-            for (int j=0; j<9; j++) {
+        for (int i=1; i<9; i++) {
+            for (int j=1; j<9; j++) {
                 ChessPosition possiblePosition = new ChessPosition(i, j);
 
                 if (gameBoard.getPiece(possiblePosition) == null) {continue;}
