@@ -268,7 +268,7 @@ public class ChessGame {
                 if (potentialTeammatePiece == null) {continue;}
                 if (potentialTeammatePiece.getTeamColor() != teamColor) {continue;}
 
-                Collection<ChessMove> teamPieceMoves = potentialTeammatePiece.pieceMoves(gameBoard, potentialTeammatePosition);
+                Collection<ChessMove> teamPieceMoves = validMoves(potentialTeammatePosition);
                 if (!teamPieceMoves.isEmpty()) {
                     return false;
                 }
