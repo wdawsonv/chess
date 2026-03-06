@@ -132,32 +132,8 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-
         ChessPosition myKingPosition = findKingPosition(teamColor);
-        boolean isChecked = false;
-
-        for (int i=1; i<9; i++) {
-            for (int j=1; j<9; j++) {
-                ChessPosition testStartPosition = new ChessPosition(i, j);
-                ChessPiece testPiece = gameBoard.getPiece(testStartPosition);
-
-                if (testPiece == null) {continue;}
-                if (testPiece.getTeamColor() == teamColor) {continue;}
-
-                Collection<ChessMove> enemyPieceMoves = testPiece.pieceMoves(gameBoard, testStartPosition);
-
-                for (ChessMove move : enemyPieceMoves) {
-                    ChessPosition enemyMoveEnd = move.getEndPosition();
-                    if (enemyMoveEnd.equals(myKingPosition)) {
-                        isChecked = true;
-                    }
-                }
-
-
-            }
-        }
-
-        return isChecked;
+        return isUnderAttack(teamColor, myKingPosition);
     }
 
     private boolean isUnderAttack(TeamColor teamColor, ChessPosition position) {
@@ -209,8 +185,67 @@ public class ChessGame {
      * @param teamColor which team to check for checkmate
      * @return True if the specified team is in checkmate
      */
-    public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+    public boolean isInCheckmate(TeamColor teamColor) throws InvalidMoveException {
+        boolean checkMated = false;
+        try {
+            if (!canBlockCheck(teamColor) && isInCheck(teamColor)) {
+                checkMated = true;
+            }
+        } catch (InvalidMoveException e) {
+            System.out.println("game was put in a bad state while checking for checkmate: THIS IS THE DEVELOPERS FAULT LOLLLL");
+        }
+        return checkMated;
+    }
+
+    private boolean canBlockCheck(TeamColor teamColor) throws InvalidMoveException {
+        //try all possible moves
+        //in each move check if the king is under attack
+        //if not then return true
+        //otherwise return false
+        boolean blockable = false;
+        for (int i=1; i<9; i++) {
+            for (int j = 1; j < 9; j++) {
+                ChessPosition potentialTeammatePosition = new ChessPosition(i, j);
+                ChessPiece potentialTeammatePiece = gameBoard.getPiece(potentialTeammatePosition);
+
+                if (potentialTeammatePiece == null) {continue;}
+                if (potentialTeammatePiece.getTeamColor() != teamColor) {continue;}
+
+                Collection<ChessMove> teamPieceMoves = potentialTeammatePiece.pieceMoves(gameBoard, potentialTeammatePosition);
+
+                for (ChessMove move : teamPieceMoves) {
+                    //set some things in case we gotta undo
+                    ChessPosition originalPosition = move.getStartPosition();
+                    ChessPosition endPosition = move.getEndPosition();
+                    ChessPiece movedPiece = gameBoard.getPiece(originalPosition);
+                    boolean pieceIsTaken = false;
+                    ChessPiece takenPiece = new ChessPiece(teamColor, ChessPiece.PieceType.PAWN); //TEMPORARY, WILL NEVER BE USED
+
+                    if (gameBoard.getPiece(endPosition) != null) {
+                        takenPiece = gameBoard.getPiece(endPosition);
+                        pieceIsTaken = true;
+                    }
+
+                    gameBoard.addPiece(originalPosition, null);
+                    gameBoard.addPiece(endPosition, movedPiece);
+
+                    if (!isInCheck(teamColor)) {
+                        blockable = true;
+                    }
+
+                    //now put everything back
+                    gameBoard.addPiece(originalPosition, movedPiece);
+                    if (pieceIsTaken) {
+                        gameBoard.addPiece(endPosition, takenPiece);
+                    } else {
+                        gameBoard.addPiece(endPosition, null);
+                    }
+
+                }
+            }
+        }
+
+        return blockable;
     }
 
     /**
