@@ -1,4 +1,5 @@
 package dataaccess;
 
-public class GameDAO {
+public interface GameDAO {
+    static void clearGameDB() {}
 }
