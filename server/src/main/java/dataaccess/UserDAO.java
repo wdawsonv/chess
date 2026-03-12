@@ -1,5 +1,11 @@
 package dataaccess;
 
+import model.*;
+
 public interface UserDAO {
-    static void clearUserDB() {}
+    void clearUserDB();
+
+    boolean getUser(String username);
+
+    void createUser(UserData userData);
 }

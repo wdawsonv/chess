@@ -1,5 +1,9 @@
 package dataaccess;
 
+import model.*;
+
 public interface AuthDAO {
-    static void clearAuthDB() {}
+    void clearAuthDB();
+
+    RegisterResult addAuth(AuthData authData);
 }
