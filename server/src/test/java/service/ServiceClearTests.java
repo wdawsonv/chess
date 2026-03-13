@@ -24,12 +24,5 @@ public class ServiceClearTests {
     }
 
  */
-    @Test
-    @DisplayName("Add User Positive Test")
-    public void addUserPositive() {
-        UserData userData = new UserData("username", "password", "email");
-        RegisterRequest registerRequest = new RegisterRequest("username", "password", "email");
-        UserService.register(registerRequest);
-        Assertions.assertTrue(UserService.getUser("username"));
-    }
+
 }

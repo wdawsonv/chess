@@ -7,6 +7,9 @@ import io.javalin.http.Handler;
 import model.*;
 import org.eclipse.jetty.server.Authentication;
 import service.*;
+import dataaccess.*;
+
+import java.util.Map;
 
 public class Server {
 
@@ -16,6 +19,8 @@ public class Server {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
 
         // Register your endpoints and exception handlers here.
+        javalin.exception(DataAccessException.class, this::exceptionHandler);
+
         javalin.delete("/db", ctx -> {
             GameService.clear();
             AuthService.clear();
@@ -25,7 +30,10 @@ public class Server {
         javalin.post("/user", ctx -> {
             UserData userData = new Gson().fromJson(ctx.body(), UserData.class);
             RegisterRequest registerRequest = new RegisterRequest(userData.username(), userData.password(), userData.email());
-            UserService.register(registerRequest); //wont return anything
+            if (!UserService.register(registerRequest)) {
+                ctx.status(403);
+                ctx.result(new Gson().toJson(Map.of("message", "Error: already taken")));
+            }
             RegisterResult registerResult = AuthService.createAuth(userData.username());
         });
     }
@@ -37,5 +45,11 @@ public class Server {
 
     public void stop() {
         javalin.stop();
+    }
+
+    private void exceptionHandler(Exception e, Context ctx) {
+        var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage()), "success", false));
+        ctx.status(500);
+        ctx.json(body);
     }
 }

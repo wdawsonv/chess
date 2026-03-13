@@ -1,9 +1,9 @@
 package service;
 
-import dataaccess.MemoryUserDAO;
-import dataaccess.UserDAO;
+import dataaccess.*;
 import model.*;
 import org.eclipse.jetty.server.Authentication;
+
 
 public class UserService {
     private static final UserDAO userDAO = new MemoryUserDAO();
@@ -12,12 +12,14 @@ public class UserService {
         userDAO.clearUserDB();
     }
 
-    public static void register(RegisterRequest registerRequest) {
+    public static boolean register(RegisterRequest registerRequest) {
         if (getUser(registerRequest.username())) {
-            //throw da error
+            //username is already in there, return false
+            return false;
         } else {
             UserData userData = new UserData(registerRequest.username(), registerRequest.password(), registerRequest.email());
             userDAO.createUser(userData);
+            return true;
         }
         //is name taken? if not then create user and auth and return registerresult
     }
