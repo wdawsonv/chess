@@ -30,6 +30,9 @@ public class Server {
             GameService.clear();
             AuthService.clear();
             UserService.clear();
+
+            ctx.status(200);
+            ctx.result();
         });
 
         javalin.post("/user", ctx -> {
@@ -82,6 +85,20 @@ public class Server {
 
             ctx.status(200);
             ctx.result(new Gson().toJson(Map.of("games", games)));
+        });
+
+        javalin.put("/game", ctx -> {
+            String authToken = ctx.header("authorization");
+            AuthService.findAuth(authToken);
+
+            String username = AuthService.findAuthReturnUsername(authToken);
+
+            JoinGameRequest joinGameRequest = new Gson().fromJson(ctx.body(), JoinGameRequest.class);
+
+            GameService.joinGame(joinGameRequest, username);
+
+            ctx.status(200);
+            ctx.result();
         });
     }
 

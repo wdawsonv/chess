@@ -10,4 +10,6 @@ public interface AuthDAO {
     boolean findAuth(String authToken);
 
     void removeAuth(String authToken);
+
+    String findUsername(String authToken);
 }

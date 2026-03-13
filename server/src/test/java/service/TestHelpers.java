@@ -22,5 +22,6 @@ public class TestHelpers {
         AuthService.clear();
         GameService.clear();
         UserService.register(new RegisterRequest("username1", "password1", "email1"));
+        UserService.register(new RegisterRequest("username2", "password2", "email2"));
     }
 }

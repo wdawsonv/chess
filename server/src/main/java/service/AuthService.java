@@ -36,4 +36,12 @@ public class AuthService {
             return true;
         }
     }
+
+    public static String findAuthReturnUsername(String authToken) throws UnauthorizedException {
+        if (!AUTH_DAO.findAuth(authToken)) {
+            throw new UnauthorizedException("unauthorized");
+        } else {
+            return AUTH_DAO.findUsername(authToken);
+        }
+    }
 }

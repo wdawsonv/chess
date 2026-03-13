@@ -1,5 +1,6 @@
 package service;
 
+import chess.ChessGame;
 import dataaccess.*;
 import model.*;
 
@@ -16,7 +17,7 @@ public class GameService {
         String gameName = createGameRequest.gameName();
         if (gameName == null) {
             throw new BadRequestException("bad request");
-        } else if (GAME_DAO.getGame(gameName)) {
+        } else if (GAME_DAO.verifyGameExists(gameName)) {
             throw new AlreadyTakenException("game name already taken");
         } else {
             int gameID = GAME_DAO.createGame(gameName);
@@ -26,5 +27,22 @@ public class GameService {
 
     public static ArrayList<GameData> listGames() {
         return GAME_DAO.listGames();
+    }
+
+    public static void joinGame(JoinGameRequest joinGameRequest, String username) throws BadRequestException, AlreadyTakenException {
+        Integer gameID = joinGameRequest.gameID();
+        ChessGame.TeamColor teamColor = joinGameRequest.playerColor();
+        GameData gameData = GAME_DAO.getGame(gameID);
+
+        if (gameID == null || teamColor == null || GAME_DAO.getGame(gameID) == null) {
+            throw new BadRequestException("bad request");
+        } else {
+            if ((teamColor == ChessGame.TeamColor.WHITE && gameData.whiteUsername() != null)
+                    || (teamColor == ChessGame.TeamColor.BLACK && gameData.blackUsername() != null)) {
+                throw new AlreadyTakenException("already taken");
+            }
+
+            GAME_DAO.addPlayer(gameID, teamColor, username);
+        }
     }
 }
