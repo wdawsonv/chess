@@ -6,6 +6,7 @@ import io.javalin.http.Context;
 import io.javalin.http.Handler;
 import model.*;
 import org.eclipse.jetty.server.Authentication;
+import org.eclipse.jetty.util.log.Log;
 import service.*;
 import dataaccess.*;
 
@@ -51,9 +52,14 @@ public class Server {
             LoginResult loginResult = new LoginResult(registerResult.username(), registerResult.authToken());
             ctx.status(200);
             ctx.result(new Gson().toJson(loginResult));
+        });
 
+        javalin.delete("/session", ctx -> {
+            String authToken = ctx.header("authorization");
+            LogoutRequest logoutRequest = new LogoutRequest(authToken);
 
-
+            AuthService.logout(logoutRequest);
+            ctx.status(200);
         });
     }
 
