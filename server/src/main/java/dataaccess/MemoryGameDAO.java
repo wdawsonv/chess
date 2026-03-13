@@ -54,9 +54,13 @@ public class MemoryGameDAO implements GameDAO {
         for (int i = 0; i < games.size(); i++) {
             if (Objects.equals(gameID, games.get(i).gameID())) {
                 if (teamColor == ChessGame.TeamColor.WHITE) {
-                    games.set(i, new GameData(games.get(i).gameID(), username, games.get(i).blackUsername(), games.get(i).gameName(), games.get(i).game()));
+                    games.set(i, new GameData(games.get(i).gameID(),
+                            username, games.get(i).blackUsername(),
+                            games.get(i).gameName(), games.get(i).game()));
                 } else {
-                    games.set(i, new GameData(games.get(i).gameID(), games.get(i).whiteUsername(), username, games.get(i).gameName(), games.get(i).game()));
+                    games.set(i, new GameData(games.get(i).gameID(),
+                            games.get(i).whiteUsername(), username,
+                            games.get(i).gameName(), games.get(i).game()));
                 }
             }
         }

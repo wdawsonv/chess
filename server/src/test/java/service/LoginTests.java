@@ -11,7 +11,7 @@ public class LoginTests {
 
     @BeforeEach
     void setup() throws AlreadyTakenException, BadRequestException {
-        TestHelpers.UserSetup();
+        TestHelpers.userSetup();
     }
 
     @Test

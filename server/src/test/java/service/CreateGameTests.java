@@ -11,7 +11,7 @@ public class CreateGameTests {
 
     @BeforeEach
     void setup() throws BadRequestException, AlreadyTakenException {
-        TestHelpers.GameSetup();
+        TestHelpers.gameSetup();
     }
 
     @Test

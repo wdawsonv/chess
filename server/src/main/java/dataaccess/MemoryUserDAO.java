@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 
 public class MemoryUserDAO implements UserDAO {
-    private static final ArrayList<UserData> users = new ArrayList<>();
+    private static ArrayList<UserData> users = new ArrayList<>();
 
     @Override
     public void clearUserDB() {
