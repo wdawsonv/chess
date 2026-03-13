@@ -2,14 +2,13 @@ package service;
 
 import dataaccess.*;
 import model.*;
-import org.eclipse.jetty.server.Authentication;
 
 
 public class UserService {
-    private static final UserDAO userDAO = new MemoryUserDAO();
+    private static final UserDAO USER_DAO = new MemoryUserDAO();
 
     public static void clear() {
-        userDAO.clearUserDB();
+        USER_DAO.clearUserDB();
     }
 
     public static void register(RegisterRequest registerRequest) throws AlreadyTakenException, BadRequestException {
@@ -19,14 +18,14 @@ public class UserService {
             throw new BadRequestException("bad request in register");
         } else {
                 UserData userData = new UserData(registerRequest.username(), registerRequest.password(), registerRequest.email());
-                userDAO.createUser(userData);
+                USER_DAO.createUser(userData);
         }
         //is name taken? if not then create user and auth and return registerresult
     }
 
     //helper
     public static boolean getUser(String username) {
-        return userDAO.getUser(username);
+        return USER_DAO.getUser(username);
     }
 
     public static boolean checkLogin(LoginRequest loginRequest) throws UnauthorizedException, BadRequestException {
@@ -37,7 +36,7 @@ public class UserService {
         } else if (!getUser(username)) {
             throw new UnauthorizedException("unauthorized");
         } else {
-            UserData userData = userDAO.getUserData(username);
+            UserData userData = USER_DAO.getUserData(username);
             if (!password.equals(userData.password())) {
                 throw new UnauthorizedException("unauthorized");
             } else {

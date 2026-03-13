@@ -7,25 +7,25 @@ import model.*;
 import java.util.UUID;
 
 public class AuthService {
-    private static final AuthDAO authDAO = new MemoryAuthDAO();
+    private static final AuthDAO AUTH_DAO = new MemoryAuthDAO();
 
     public static void clear() {
-        authDAO.clearAuthDB();
+        AUTH_DAO.clearAuthDB();
     }
 
     public static RegisterResult createAuth(String username) {
         String authToken = UUID.randomUUID().toString();
         AuthData authData = new AuthData(authToken, username);
-        return authDAO.addAuth(authData);
+        return AUTH_DAO.addAuth(authData);
     }
 
     public static void logout(LogoutRequest logoutRequest) throws UnauthorizedException {
         String authToken = logoutRequest.authToken();
 
-        if (!authDAO.findAuth(authToken)) {
+        if (!AUTH_DAO.findAuth(authToken)) {
             throw new UnauthorizedException("unauthorized");
         } else {
-            authDAO.removeAuth(authToken);
+            AUTH_DAO.removeAuth(authToken);
         }
     }
 }

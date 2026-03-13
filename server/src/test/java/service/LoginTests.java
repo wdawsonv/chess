@@ -13,19 +13,12 @@ public class LoginTests {
 
     @BeforeEach
     void setup() throws AlreadyTakenException, BadRequestException {
-        UserService.clear();
-        AuthService.clear();
-        GameService.clear();
-        UserService.register(new RegisterRequest("username1", "password1", "email1"));
-        UserService.register(new RegisterRequest("username2", "password2", "email2"));
-        UserService.register(new RegisterRequest("username3", "password3", "email3"));
-
+        TestHelpers.setup();
     }
-
 
     @Test
     @DisplayName("Login Positive Test")
-    public void LoginPositive() throws BadRequestException, AlreadyTakenException, UnauthorizedException {
+    public void loginPositive() throws BadRequestException, AlreadyTakenException, UnauthorizedException {
         Assertions.assertTrue(UserService.checkLogin(new LoginRequest("username1", "password1")));
     }
 
@@ -38,7 +31,7 @@ public class LoginTests {
 
     @Test
     @DisplayName("Login Negative Unauthorized Test")
-    public void LoginNegativeUnauthorizedTest() {
+    public void loginNegativeUnauthorizedTest() {
         Assertions.assertThrows(UnauthorizedException.class, () ->
                 UserService.checkLogin(new LoginRequest("username4", "password1")));
     }

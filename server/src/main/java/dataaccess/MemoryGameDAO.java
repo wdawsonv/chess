@@ -9,7 +9,8 @@ import java.util.Map;
 public class MemoryGameDAO implements GameDAO {
     private static ArrayList<GameData> games = new ArrayList<>();
 
-    static public void clearGameDB() {
+    @Override
+    public void clearGameDB() {
         games.clear();
     }
 
