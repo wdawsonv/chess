@@ -1,6 +1,7 @@
 package service;
 
 import dataaccess.*;
+import model.LoginRequest;
 import model.RegisterRequest;
 import model.UserData;
 import org.junit.jupiter.api.Assertions;
@@ -24,16 +25,21 @@ public class LoginTests {
 
     @Test
     @DisplayName("Login Positive Test")
-    public void LoginPositive() throws BadRequestException, AlreadyTakenException {
+    public void LoginPositive() throws BadRequestException, AlreadyTakenException, UnauthorizedException {
+        Assertions.assertTrue(UserService.checkLogin(new LoginRequest("username1", "password1")));
     }
 
     @Test
     @DisplayName("Login Negative Bad Request Test")
     public void loginNegativeBadRequestTest() {
+        Assertions.assertThrows(BadRequestException.class, () ->
+                UserService.checkLogin(new LoginRequest(null, "password2")));
     }
 
     @Test
     @DisplayName("Login Negative Unauthorized Test")
     public void LoginNegativeUnauthorizedTest() {
+        Assertions.assertThrows(UnauthorizedException.class, () ->
+                UserService.checkLogin(new LoginRequest("username4", "password1")));
     }
 }
