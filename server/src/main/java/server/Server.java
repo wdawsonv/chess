@@ -19,7 +19,9 @@ public class Server {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
 
         // Register your endpoints and exception handlers here.
-        javalin.exception(DataAccessException.class, this::exceptionHandler);
+        javalin.exception(DataAccessException.class, this::dataAccessExceptionHandler);
+        javalin.exception(AlreadyTakenException.class, this::alreadyTakenExceptionHandler);
+        javalin.exception(BadRequestException.class, this::badRequestExceptionHandler);
 
         javalin.delete("/db", ctx -> {
             GameService.clear();
@@ -30,11 +32,11 @@ public class Server {
         javalin.post("/user", ctx -> {
             UserData userData = new Gson().fromJson(ctx.body(), UserData.class);
             RegisterRequest registerRequest = new RegisterRequest(userData.username(), userData.password(), userData.email());
-            if (!UserService.register(registerRequest)) {
-                ctx.status(403);
-                ctx.result(new Gson().toJson(Map.of("message", "Error: already taken")));
-            }
+
+            UserService.register(registerRequest);
             RegisterResult registerResult = AuthService.createAuth(userData.username());
+            ctx.status(200);
+            ctx.result(new Gson().toJson(registerResult));
         });
     }
 
@@ -47,7 +49,19 @@ public class Server {
         javalin.stop();
     }
 
-    private void exceptionHandler(Exception e, Context ctx) {
+    private void badRequestExceptionHandler(Exception e, Context ctx) {
+        var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage()), "success", false));
+        ctx.status(400);
+        ctx.json(body);
+    }
+
+    private void alreadyTakenExceptionHandler(Exception e, Context ctx) {
+        var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage()), "success", false));
+        ctx.status(403);
+        ctx.json(body);
+    }
+
+    private void dataAccessExceptionHandler(Exception e, Context ctx) {
         var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage()), "success", false));
         ctx.status(500);
         ctx.json(body);

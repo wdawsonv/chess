@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 public class RegisterTests {
 
     @BeforeEach
-    void setup() throws AlreadyTakenException {
+    void setup() throws AlreadyTakenException, BadRequestException {
         UserService.clear();
         AuthService.clear();
         GameService.clear();
@@ -24,7 +24,7 @@ public class RegisterTests {
 
     @Test
     @DisplayName("Add User Positive Test")
-    public void addUserPositive() throws AlreadyTakenException {
+    public void addUserPositive() throws BadRequestException, AlreadyTakenException {
         UserData userData = new UserData("username", "password", "email");
         RegisterRequest registerRequest = new RegisterRequest("username", "password", "email");
         UserService.register(registerRequest);
@@ -32,8 +32,15 @@ public class RegisterTests {
     }
 
     @Test
-    @DisplayName("Add User Negative Test")
-    public void addUserNegative() throws AlreadyTakenException {
-        Assertions.assertFalse(UserService.register(new RegisterRequest("username1", "password", "email")));
+    @DisplayName("Add User Negative Already Taken Test")
+    public void addUserNegativeAlreadyTaken() {
+        Assertions.assertThrows(AlreadyTakenException.class, () ->
+                UserService.register(new RegisterRequest("username1", "password", "email")));
+    }
+
+    @DisplayName("Add User Negative Bad Request Test")
+    public void addUserNegativeBadRequest() {
+        Assertions.assertThrows(BadRequestException.class, () ->
+                UserService.register(new RegisterRequest(null, "password", "email")));
     }
 }

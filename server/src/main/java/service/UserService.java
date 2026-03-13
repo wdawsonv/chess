@@ -12,14 +12,14 @@ public class UserService {
         userDAO.clearUserDB();
     }
 
-    public static boolean register(RegisterRequest registerRequest) {
+    public static void register(RegisterRequest registerRequest) throws AlreadyTakenException, BadRequestException {
         if (getUser(registerRequest.username())) {
-            //username is already in there, return false
-            return false;
+            throw new AlreadyTakenException("already taken");
+        } else if (registerRequest.username() == null || registerRequest.password() == null || registerRequest.email() == null) {
+            throw new BadRequestException("bad request in register");
         } else {
-            UserData userData = new UserData(registerRequest.username(), registerRequest.password(), registerRequest.email());
-            userDAO.createUser(userData);
-            return true;
+                UserData userData = new UserData(registerRequest.username(), registerRequest.password(), registerRequest.email());
+                userDAO.createUser(userData);
         }
         //is name taken? if not then create user and auth and return registerresult
     }
