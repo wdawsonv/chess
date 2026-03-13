@@ -21,8 +21,8 @@ public class CreateGameTests {
 
     @Test
     @DisplayName("Create Game Positive Test")
-    public void createGamePositiveTest() {
-        Assertions.assertEquals(GameService.createGame(new CreateGameRequest("gameName")), new CreateGameResult(0000));
+    public void createGamePositiveTest() throws AlreadyTakenException, BadRequestException {
+        Assertions.assertEquals(new CreateGameResult(1), GameService.createGame(new CreateGameRequest("gameName")));
     }
 
     @Test

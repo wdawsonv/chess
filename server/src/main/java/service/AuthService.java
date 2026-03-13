@@ -22,10 +22,18 @@ public class AuthService {
     public static void logout(LogoutRequest logoutRequest) throws UnauthorizedException {
         String authToken = logoutRequest.authToken();
 
-        if (!AUTH_DAO.findAuth(authToken)) {
+        if (!findAuth(authToken)) {
             throw new UnauthorizedException("unauthorized");
         } else {
             AUTH_DAO.removeAuth(authToken);
+        }
+    }
+
+    public static boolean findAuth(String authToken) throws UnauthorizedException {
+        if (!AUTH_DAO.findAuth(authToken)) {
+            throw new UnauthorizedException("unauthorized");
+        } else {
+            return true;
         }
     }
 }

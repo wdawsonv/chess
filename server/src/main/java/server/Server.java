@@ -61,6 +61,18 @@ public class Server {
             AuthService.logout(logoutRequest);
             ctx.status(200);
         });
+
+        javalin.post("/game", ctx -> {
+            String authToken = ctx.header("authorization");
+            AuthService.findAuth(authToken);
+
+            CreateGameRequest createGameRequest = new Gson().fromJson(ctx.body(), CreateGameRequest.class);
+            CreateGameResult createGameResult = GameService.createGame(createGameRequest);
+
+            ctx.status(200);
+            ctx.result(new Gson().toJson(createGameResult));
+
+        });
     }
 
     public int run(int desiredPort) {
