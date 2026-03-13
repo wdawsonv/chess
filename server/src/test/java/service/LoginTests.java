@@ -18,7 +18,7 @@ public class LoginTests {
 
     @Test
     @DisplayName("Login Positive Test")
-    public void loginPositive() throws BadRequestException, AlreadyTakenException, UnauthorizedException {
+    public void loginPositiveTest() throws BadRequestException, AlreadyTakenException, UnauthorizedException {
         Assertions.assertTrue(UserService.checkLogin(new LoginRequest("username1", "password1")));
     }
 

@@ -17,7 +17,7 @@ public class RegisterTests {
 
     @Test
     @DisplayName("Add User Positive Test")
-    public void addUserPositive() throws BadRequestException, AlreadyTakenException {
+    public void addUserPositiveTest() throws BadRequestException, AlreadyTakenException {
         UserData userData = new UserData("username", "password", "email");
         RegisterRequest registerRequest = new RegisterRequest("username", "password", "email");
         UserService.register(registerRequest);
@@ -26,14 +26,14 @@ public class RegisterTests {
 
     @Test
     @DisplayName("Add User Negative Already Taken Test")
-    public void addUserNegativeAlreadyTaken() {
+    public void addUserNegativeAlreadyTakenTest() {
         Assertions.assertThrows(AlreadyTakenException.class, () ->
                 UserService.register(new RegisterRequest("username1", "password", "email")));
     }
 
     @Test
     @DisplayName("Add User Negative Bad Request Test")
-    public void addUserNegativeBadRequest() {
+    public void addUserNegativeBadRequestTest() {
         Assertions.assertThrows(BadRequestException.class, () ->
                 UserService.register(new RegisterRequest(null, "password", "email")));
     }

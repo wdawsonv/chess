@@ -10,7 +10,7 @@ public class ServiceClearTests {
 
     @Test
     @DisplayName("Clear Database")
-    public void clearDatabase() {
+    public void clearDatabaseTest() {
         UserService.clear();
         GameService.clear();
         AuthService.clear();
