@@ -29,4 +29,21 @@ public class UserService {
         return userDAO.getUser(username);
     }
 
+    public static boolean checkLogin(LoginRequest loginRequest) throws UnauthorizedException, BadRequestException {
+        String username = loginRequest.username(), password = loginRequest.password();
+
+        if (username == null || password == null) {
+            throw new BadRequestException("bad request");
+        } else if (!getUser(username)) {
+            throw new UnauthorizedException("unauthorized");
+        } else {
+            UserData userData = userDAO.getUserData(username);
+            if (!password.equals(userData.password())) {
+                throw new UnauthorizedException("unauthorized");
+            } else {
+                return true;
+            }
+        }
+    }
+
 }

@@ -8,4 +8,6 @@ public interface UserDAO {
     boolean getUser(String username);
 
     void createUser(UserData userData);
+
+    UserData getUserData(String username) throws UnauthorizedException;
 }

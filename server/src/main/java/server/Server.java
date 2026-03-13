@@ -22,6 +22,7 @@ public class Server {
         javalin.exception(DataAccessException.class, this::dataAccessExceptionHandler);
         javalin.exception(AlreadyTakenException.class, this::alreadyTakenExceptionHandler);
         javalin.exception(BadRequestException.class, this::badRequestExceptionHandler);
+        javalin.exception(UnauthorizedException.class, this::unauthorizedExceptionHandler);
 
         javalin.delete("/db", ctx -> {
             GameService.clear();
@@ -38,6 +39,22 @@ public class Server {
             ctx.status(200);
             ctx.result(new Gson().toJson(registerResult));
         });
+
+        javalin.post("/session", ctx -> {
+            LoginRequest loginRequest = new Gson().fromJson(ctx.body(), LoginRequest.class);
+
+            //this line should throw all the errors i thinnkkkkk
+            UserService.checkLogin(loginRequest);
+
+            RegisterResult registerResult = AuthService.createAuth(loginRequest.username());
+            //not too fond of this but it's the cleanest route i could think of
+            LoginResult loginResult = new LoginResult(registerResult.username(), registerResult.authToken());
+            ctx.status(200);
+            ctx.result(new Gson().toJson(loginResult));
+
+
+
+        });
     }
 
     public int run(int desiredPort) {
@@ -52,6 +69,12 @@ public class Server {
     private void badRequestExceptionHandler(Exception e, Context ctx) {
         var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage()), "success", false));
         ctx.status(400);
+        ctx.json(body);
+    }
+
+    private void unauthorizedExceptionHandler(Exception e, Context ctx) {
+        var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage()), "success", false));
+        ctx.status(401);
         ctx.json(body);
     }
 

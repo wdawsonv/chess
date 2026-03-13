@@ -27,4 +27,14 @@ public class MemoryUserDAO implements UserDAO {
     public void createUser(UserData userData) {
         users.add(userData);
     }
+
+    @Override
+    public UserData getUserData(String username) throws UnauthorizedException {
+        for (UserData user : users) {
+            if (user.username().equals(username)) {
+                return user;
+            }
+        }
+        throw new UnauthorizedException("unauthorized");
+    }
 }

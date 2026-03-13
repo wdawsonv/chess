@@ -38,6 +38,7 @@ public class RegisterTests {
                 UserService.register(new RegisterRequest("username1", "password", "email")));
     }
 
+    @Test
     @DisplayName("Add User Negative Bad Request Test")
     public void addUserNegativeBadRequest() {
         Assertions.assertThrows(BadRequestException.class, () ->
