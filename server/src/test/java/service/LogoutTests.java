@@ -1,8 +1,6 @@
 package service;
 
 import dataaccess.*;
-import model.LoginRequest;
-import model.RegisterRequest;
 import model.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,7 +11,7 @@ public class LogoutTests {
 
     @BeforeEach
     void setup() throws AlreadyTakenException, BadRequestException {
-        TestHelpers.setup();
+        TestHelpers.UserSetup();
     }
 
     @Test

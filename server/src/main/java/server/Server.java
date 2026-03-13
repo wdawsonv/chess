@@ -10,6 +10,7 @@ import org.eclipse.jetty.util.log.Log;
 import service.*;
 import dataaccess.*;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 public class Server {
@@ -71,7 +72,16 @@ public class Server {
 
             ctx.status(200);
             ctx.result(new Gson().toJson(createGameResult));
+        });
 
+        javalin.get("/game", ctx -> {
+            String authToken = ctx.header("authorization");
+            AuthService.findAuth(authToken);
+
+            ArrayList<GameData> games = GameService.listGames();
+
+            ctx.status(200);
+            ctx.result(new Gson().toJson(Map.of("games", games)));
         });
     }
 

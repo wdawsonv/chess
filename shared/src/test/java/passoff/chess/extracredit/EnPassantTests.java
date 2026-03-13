@@ -234,7 +234,7 @@ public class EnPassantTests {
         game.setBoard(board);
         game.setTeamTurn(turn);
 
-        //setup prior move for en passant
+        //UserSetup prior move for en passant
         game.makeMove(setupMove);
 
         //make sure pawn has En Passant move

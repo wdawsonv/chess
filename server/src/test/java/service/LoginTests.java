@@ -2,8 +2,6 @@ package service;
 
 import dataaccess.*;
 import model.LoginRequest;
-import model.RegisterRequest;
-import model.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -13,7 +11,7 @@ public class LoginTests {
 
     @BeforeEach
     void setup() throws AlreadyTakenException, BadRequestException {
-        TestHelpers.setup();
+        TestHelpers.UserSetup();
     }
 
     @Test

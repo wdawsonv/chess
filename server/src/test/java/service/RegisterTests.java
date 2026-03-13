@@ -12,7 +12,7 @@ public class RegisterTests {
 
     @BeforeEach
     void setup() throws AlreadyTakenException, BadRequestException {
-        TestHelpers.setup();
+        TestHelpers.UserSetup();
     }
 
     @Test

@@ -11,12 +11,7 @@ public class CreateGameTests {
 
     @BeforeEach
     void setup() throws BadRequestException, AlreadyTakenException {
-        UserService.clear();
-        AuthService.clear();
-        GameService.clear();
-        UserService.register(new RegisterRequest("username1", "password1", "email1"));
-        RegisterResult loginResult = AuthService.createAuth("username1");
-        String authToken = loginResult.authToken();
+        TestHelpers.GameSetup();
     }
 
     @Test

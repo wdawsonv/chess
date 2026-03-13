@@ -3,6 +3,8 @@ package service;
 import dataaccess.*;
 import model.*;
 
+import java.util.ArrayList;
+
 public class GameService {
     private static final GameDAO GAME_DAO = new MemoryGameDAO();
 
@@ -20,5 +22,9 @@ public class GameService {
             int gameID = GAME_DAO.createGame(gameName);
             return new CreateGameResult(gameID);
         }
+    }
+
+    public static ArrayList<GameData> listGames() {
+        return GAME_DAO.listGames();
     }
 }
