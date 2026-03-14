@@ -40,11 +40,11 @@ public class GameService {
     public static void joinGame(JoinGameRequest joinGameRequest, String username) throws BadRequestException, AlreadyTakenException, DataAccessException {
         Integer gameID = joinGameRequest.gameID();
         ChessGame.TeamColor teamColor = joinGameRequest.playerColor();
-        GameData gameData = GAME_DAO.getGame(gameID);
 
         if (gameID == null || teamColor == null || GAME_DAO.getGame(gameID) == null) {
             throw new BadRequestException("bad request");
         } else {
+            GameData gameData = GAME_DAO.getGame(gameID);
             if ((teamColor == ChessGame.TeamColor.WHITE && gameData.whiteUsername() != null)
                     || (teamColor == ChessGame.TeamColor.BLACK && gameData.blackUsername() != null)) {
                 throw new AlreadyTakenException("already taken");
