@@ -11,14 +11,26 @@ class DatabaseUserDAOTest {
     }
 
     @Test
-    void getUser() {
+    void getUserPositive() {
     }
 
     @Test
-    void createUser() {
+    void getUserNegative() {
     }
 
     @Test
-    void getUserData() {
+    void createUserPositive() {
+    }
+
+    @Test
+    void createUserNegative() {
+    }
+
+    @Test
+    void getUserDataPositive() {
+    }
+
+    @Test
+    void getUserDataNegative() {
     }
 }

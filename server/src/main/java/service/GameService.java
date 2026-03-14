@@ -21,7 +21,9 @@ public class GameService {
         GAME_DAO.clearGameDB();
     }
 
-    public static CreateGameResult createGame(CreateGameRequest createGameRequest) throws AlreadyTakenException, BadRequestException, DataAccessException {
+    public static CreateGameResult createGame(CreateGameRequest createGameRequest)
+            throws AlreadyTakenException, BadRequestException, DataAccessException {
+
         String gameName = createGameRequest.gameName();
         if (gameName == null) {
             throw new BadRequestException("bad request");
@@ -37,7 +39,9 @@ public class GameService {
         return GAME_DAO.listGames();
     }
 
-    public static void joinGame(JoinGameRequest joinGameRequest, String username) throws BadRequestException, AlreadyTakenException, DataAccessException {
+    public static void joinGame(JoinGameRequest joinGameRequest, String username)
+            throws BadRequestException, AlreadyTakenException, DataAccessException {
+
         Integer gameID = joinGameRequest.gameID();
         ChessGame.TeamColor teamColor = joinGameRequest.playerColor();
 

@@ -16,7 +16,7 @@ public class DatabaseUserDAO implements UserDAO {
     @Override
     public void clearUserDB() throws DataAccessException {
         var statement = "TRUNCATE users";
-        executeUpdate(statement);
+        DatabaseDAOHelpers.executeUpdate(statement);
 
     }
 
@@ -41,7 +41,7 @@ public class DatabaseUserDAO implements UserDAO {
     @Override
     public void createUser(UserData userData) throws DataAccessException {
         var statement = "INSERT into users (username, password, email) VALUES (?, ?, ?)";
-        executeUpdate(statement, userData.username(), userData.password(), userData.email());
+        DatabaseDAOHelpers.executeUpdate(statement, userData.username(), userData.password(), userData.email());
 
     }
 
@@ -70,28 +70,6 @@ public class DatabaseUserDAO implements UserDAO {
         return new UserData(username, password, email);
     }
 
-    private void executeUpdate(String statement, Object... params) throws DataAccessException {
-        try (Connection conn = DatabaseManager.getConnection()) {
-            try (PreparedStatement ps = conn.prepareStatement(statement)) {
-                for (int i = 0; i < params.length; i++) {
-                    Object param = params[i];
-                    if (param instanceof String p) ps.setString(i + 1, p);
-                    else if (param == null) ps.setNull(i + 1, NULL);
-                }
-                ps.executeUpdate();
-//                Don't think I need these but keeping them temporarily, if i do need them then change the return of this function back to int
-//                ResultSet rs = ps.getGeneratedKeys();
-//                if (rs.next()) {
-//                    return rs.getInt(1);
-//                }
-//
-//                return 0;
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException(String.format("unable to update database: %s, %s", statement, e.getMessage()));
-        }
-    }
-
     private final String[] createStatements = {
             """
             CREATE TABLE IF NOT EXISTS users (
@@ -104,6 +82,10 @@ public class DatabaseUserDAO implements UserDAO {
     };
 
     private void configureDatabase() throws DataAccessException {
+        configureDatabase(createStatements);
+    }
+
+    static void configureDatabase(String[] createStatements) throws DataAccessException {
         DatabaseManager.createDatabase();
         try (Connection conn = DatabaseManager.getConnection()) {
             for (String statement : createStatements) {

@@ -19,13 +19,13 @@ public class DatabaseAuthDAO implements AuthDAO {
     @Override
     public void clearAuthDB() throws DataAccessException {
         var statement = "TRUNCATE auths";
-        executeUpdate(statement);
+        DatabaseDAOHelpers.executeUpdate(statement);
     }
 
     @Override
     public RegisterResult addAuth(AuthData authData) throws DataAccessException {
         var statement = "INSERT into auths (authToken, username) VALUES (?, ?)";
-        executeUpdate(statement, authData.authToken(), authData.username());
+        DatabaseDAOHelpers.executeUpdate(statement, authData.authToken(), authData.username());
         return new RegisterResult(authData.username(), authData.authToken());
     }
 
@@ -51,7 +51,7 @@ public class DatabaseAuthDAO implements AuthDAO {
     @Override
     public void removeAuth(String authToken) throws DataAccessException {
         var statement = "DELETE FROM auths WHERE authToken=?";
-        executeUpdate(statement, authToken);
+        DatabaseDAOHelpers.executeUpdate(statement, authToken);
     }
 
     @Override
@@ -76,21 +76,6 @@ public class DatabaseAuthDAO implements AuthDAO {
         return rs.getString("username");
     }
 
-    private void executeUpdate(String statement, Object... params) throws DataAccessException {
-        try (Connection conn = DatabaseManager.getConnection()) {
-            try (PreparedStatement ps = conn.prepareStatement(statement)) {
-                for (int i = 0; i < params.length; i++) {
-                    Object param = params[i];
-                    if (param instanceof String p) ps.setString(i + 1, p);
-                    else if (param == null) ps.setNull(i + 1, NULL);
-                }
-                ps.executeUpdate();
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException(String.format("unable to update database: %s, %s", statement, e.getMessage()));
-        }
-    }
-
     private final String[] createStatements = {
             """
             CREATE TABLE IF NOT EXISTS auths (
@@ -102,15 +87,6 @@ public class DatabaseAuthDAO implements AuthDAO {
     };
 
     private void configureDatabase() throws DataAccessException {
-        DatabaseManager.createDatabase();
-        try (Connection conn = DatabaseManager.getConnection()) {
-            for (String statement : createStatements) {
-                try (var preparedStatement = conn.prepareStatement(statement)) {
-                    preparedStatement.executeUpdate();
-                }
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException(String.format("Unable to configure database: %s", e.getMessage()));
-        }
+        DatabaseUserDAO.configureDatabase(createStatements);
     }
 }
