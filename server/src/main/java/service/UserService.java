@@ -2,6 +2,7 @@ package service;
 
 import dataaccess.*;
 import model.*;
+import org.mindrot.jbcrypt.BCrypt;
 
 
 public class UserService {
@@ -25,7 +26,8 @@ public class UserService {
         } else if (registerRequest.username() == null || registerRequest.password() == null || registerRequest.email() == null) {
             throw new BadRequestException("bad request in register");
         } else {
-                UserData userData = new UserData(registerRequest.username(), registerRequest.password(), registerRequest.email());
+                String hashedPassword = BCrypt.hashpw(registerRequest.password(), BCrypt.gensalt());
+                UserData userData = new UserData(registerRequest.username(), hashedPassword, registerRequest.email());
                 USER_DAO.createUser(userData);
         }
         //is name taken? if not then create user and auth and return registerresult
@@ -37,7 +39,8 @@ public class UserService {
     }
 
     public static boolean checkLogin(LoginRequest loginRequest) throws UnauthorizedException, BadRequestException, DataAccessException {
-        String username = loginRequest.username(), password = loginRequest.password();
+        String username = loginRequest.username();
+        String password = loginRequest.password();
 
         if (username == null || password == null) {
             throw new BadRequestException("bad request");
@@ -45,7 +48,7 @@ public class UserService {
             throw new UnauthorizedException("unauthorized");
         } else {
             UserData userData = USER_DAO.getUserData(username);
-            if (!password.equals(userData.password())) {
+            if (!BCrypt.checkpw(password, userData.password())) {
                 throw new UnauthorizedException("unauthorized");
             } else {
                 return true;
