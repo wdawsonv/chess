@@ -2,11 +2,12 @@ package service;
 
 import dataaccess.AlreadyTakenException;
 import dataaccess.BadRequestException;
+import dataaccess.DataAccessException;
 import model.RegisterRequest;
 
 public class TestHelpers {
 
-    public static void userSetup() throws AlreadyTakenException, BadRequestException {
+    public static void userSetup() throws AlreadyTakenException, BadRequestException, DataAccessException {
         UserService.clear();
         AuthService.clear();
         GameService.clear();
@@ -16,7 +17,7 @@ public class TestHelpers {
 
     }
 
-    public static void gameSetup() throws BadRequestException, AlreadyTakenException {
+    public static void gameSetup() throws BadRequestException, AlreadyTakenException, DataAccessException {
         UserService.clear();
         AuthService.clear();
         GameService.clear();

@@ -11,13 +11,13 @@ import org.junit.jupiter.api.Test;
 public class RegisterTests {
 
     @BeforeEach
-    void setup() throws AlreadyTakenException, BadRequestException {
+    void setup() throws AlreadyTakenException, BadRequestException, DataAccessException {
         TestHelpers.userSetup();
     }
 
     @Test
     @DisplayName("Add User Positive Test")
-    public void addUserPositiveTest() throws BadRequestException, AlreadyTakenException {
+    public void addUserPositiveTest() throws BadRequestException, AlreadyTakenException, DataAccessException {
         UserData userData = new UserData("username", "password", "email");
         RegisterRequest registerRequest = new RegisterRequest("username", "password", "email");
         UserService.register(registerRequest);

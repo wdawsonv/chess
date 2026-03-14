@@ -2,6 +2,7 @@ package service;
 
 import dataaccess.AlreadyTakenException;
 import dataaccess.BadRequestException;
+import dataaccess.DataAccessException;
 import dataaccess.UnauthorizedException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,7 +14,7 @@ import java.util.ArrayList;
 public class ListGamesTests {
 
     @BeforeEach
-    void setup() throws BadRequestException, AlreadyTakenException {
+    void setup() throws BadRequestException, AlreadyTakenException, DataAccessException {
         TestHelpers.gameSetup();
     }
 

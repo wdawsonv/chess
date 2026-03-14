@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 public class LogoutTests {
 
     @BeforeEach
-    void setup() throws AlreadyTakenException, BadRequestException {
+    void setup() throws AlreadyTakenException, BadRequestException, DataAccessException {
         TestHelpers.userSetup();
     }
 

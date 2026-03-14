@@ -10,13 +10,13 @@ import org.junit.jupiter.api.Test;
 public class LoginTests {
 
     @BeforeEach
-    void setup() throws AlreadyTakenException, BadRequestException {
+    void setup() throws AlreadyTakenException, BadRequestException, DataAccessException {
         TestHelpers.userSetup();
     }
 
     @Test
     @DisplayName("Login Positive Test")
-    public void loginPositiveTest() throws BadRequestException, AlreadyTakenException, UnauthorizedException {
+    public void loginPositiveTest() throws BadRequestException, AlreadyTakenException, UnauthorizedException, DataAccessException {
         Assertions.assertTrue(UserService.checkLogin(new LoginRequest("username1", "password1")));
     }
 

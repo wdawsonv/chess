@@ -10,7 +10,7 @@ public class ServiceClearTests {
 
     @Test
     @DisplayName("Clear Database")
-    public void clearDatabaseTest() {
+    public void clearDatabaseTest() throws DataAccessException {
         UserService.clear();
         GameService.clear();
         AuthService.clear();

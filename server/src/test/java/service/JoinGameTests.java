@@ -3,6 +3,7 @@ package service;
 import chess.ChessGame;
 import dataaccess.AlreadyTakenException;
 import dataaccess.BadRequestException;
+import dataaccess.DataAccessException;
 import dataaccess.UnauthorizedException;
 import model.*;
 import org.junit.jupiter.api.Assertions;
@@ -15,7 +16,7 @@ import java.util.ArrayList;
 public class JoinGameTests {
 
     @BeforeEach
-    void setup() throws BadRequestException, AlreadyTakenException {
+    void setup() throws BadRequestException, AlreadyTakenException, DataAccessException {
         TestHelpers.gameSetup();
     }
 

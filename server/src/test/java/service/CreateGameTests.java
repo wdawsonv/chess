@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 public class CreateGameTests {
 
     @BeforeEach
-    void setup() throws BadRequestException, AlreadyTakenException {
+    void setup() throws BadRequestException, AlreadyTakenException, DataAccessException {
         TestHelpers.gameSetup();
     }
 

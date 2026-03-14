@@ -15,11 +15,11 @@ public class UserService {
         }
     }
 
-    public static void clear() {
+    public static void clear() throws DataAccessException {
         USER_DAO.clearUserDB();
     }
 
-    public static void register(RegisterRequest registerRequest) throws AlreadyTakenException, BadRequestException {
+    public static void register(RegisterRequest registerRequest) throws AlreadyTakenException, BadRequestException, DataAccessException {
         if (getUser(registerRequest.username())) {
             throw new AlreadyTakenException("already taken");
         } else if (registerRequest.username() == null || registerRequest.password() == null || registerRequest.email() == null) {
@@ -32,11 +32,11 @@ public class UserService {
     }
 
     //helper
-    public static boolean getUser(String username) {
+    public static boolean getUser(String username) throws DataAccessException {
         return USER_DAO.getUser(username);
     }
 
-    public static boolean checkLogin(LoginRequest loginRequest) throws UnauthorizedException, BadRequestException {
+    public static boolean checkLogin(LoginRequest loginRequest) throws UnauthorizedException, BadRequestException, DataAccessException {
         String username = loginRequest.username(), password = loginRequest.password();
 
         if (username == null || password == null) {
