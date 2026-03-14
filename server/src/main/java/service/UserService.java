@@ -5,7 +5,15 @@ import model.*;
 
 
 public class UserService {
-    private static final UserDAO USER_DAO = new DatabaseUserDAO();
+    private static final UserDAO USER_DAO;
+
+    static {
+        try {
+            USER_DAO = new DatabaseUserDAO();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public static void clear() {
         USER_DAO.clearUserDB();
