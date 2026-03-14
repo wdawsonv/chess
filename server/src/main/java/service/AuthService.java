@@ -1,26 +1,31 @@
 package service;
 
-import dataaccess.AuthDAO;
-import dataaccess.DatabaseAuthDAO;
-import dataaccess.MemoryAuthDAO;
-import dataaccess.UnauthorizedException;
+import dataaccess.*;
 import model.*;
 import java.util.UUID;
 
 public class AuthService {
-    private static final AuthDAO AUTH_DAO = new DatabaseAuthDAO();
+    private static final AuthDAO AUTH_DAO;
 
-    public static void clear() {
+    static {
+        try {
+            AUTH_DAO = new DatabaseAuthDAO();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void clear() throws DataAccessException {
         AUTH_DAO.clearAuthDB();
     }
 
-    public static RegisterResult createAuth(String username) {
+    public static RegisterResult createAuth(String username) throws DataAccessException {
         String authToken = UUID.randomUUID().toString();
         AuthData authData = new AuthData(authToken, username);
         return AUTH_DAO.addAuth(authData);
     }
 
-    public static void logout(LogoutRequest logoutRequest) throws UnauthorizedException {
+    public static void logout(LogoutRequest logoutRequest) throws UnauthorizedException, DataAccessException {
         String authToken = logoutRequest.authToken();
 
         if (!findAuth(authToken)) {
@@ -30,7 +35,7 @@ public class AuthService {
         }
     }
 
-    public static boolean findAuth(String authToken) throws UnauthorizedException {
+    public static boolean findAuth(String authToken) throws UnauthorizedException, DataAccessException {
         if (!AUTH_DAO.findAuth(authToken)) {
             throw new UnauthorizedException("unauthorized");
         } else {
@@ -38,7 +43,7 @@ public class AuthService {
         }
     }
 
-    public static String findAuthReturnUsername(String authToken) throws UnauthorizedException {
+    public static String findAuthReturnUsername(String authToken) throws UnauthorizedException, DataAccessException {
         if (!AUTH_DAO.findAuth(authToken)) {
             throw new UnauthorizedException("unauthorized");
         } else {

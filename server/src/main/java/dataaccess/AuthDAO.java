@@ -3,13 +3,13 @@ package dataaccess;
 import model.*;
 
 public interface AuthDAO {
-    void clearAuthDB();
+    void clearAuthDB() throws DataAccessException;
 
-    RegisterResult addAuth(AuthData authData);
+    RegisterResult addAuth(AuthData authData) throws DataAccessException;
 
-    boolean findAuth(String authToken);
+    boolean findAuth(String authToken) throws DataAccessException;
 
-    void removeAuth(String authToken);
+    void removeAuth(String authToken) throws DataAccessException;
 
-    String findUsername(String authToken);
+    String findUsername(String authToken) throws DataAccessException;
 }

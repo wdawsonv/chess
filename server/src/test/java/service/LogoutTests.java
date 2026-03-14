@@ -16,7 +16,7 @@ public class LogoutTests {
 
     @Test
     @DisplayName("Logout Positive Test")
-    public void logoutPositiveTest() throws BadRequestException, AlreadyTakenException, UnauthorizedException {
+    public void logoutPositiveTest() throws BadRequestException, AlreadyTakenException, UnauthorizedException, DataAccessException {
         RegisterResult loginResult = AuthService.createAuth("username1");
         String authToken = loginResult.authToken();
         Assertions.assertDoesNotThrow(() -> AuthService.logout(new LogoutRequest(authToken)));
