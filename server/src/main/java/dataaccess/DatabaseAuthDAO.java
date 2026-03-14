@@ -25,7 +25,7 @@ public class DatabaseAuthDAO implements AuthDAO {
     @Override
     public RegisterResult addAuth(AuthData authData) throws DataAccessException {
         var statement = "INSERT into auths (authToken, username) VALUES (?, ?)";
-        executeUpdate(statement, authData.authToken(), authData.authToken());
+        executeUpdate(statement, authData.authToken(), authData.username());
         return new RegisterResult(authData.username(), authData.authToken());
     }
 
