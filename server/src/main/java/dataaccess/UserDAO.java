@@ -3,11 +3,11 @@ package dataaccess;
 import model.*;
 
 public interface UserDAO {
-    void clearUserDB();
+    void clearUserDB() throws DataAccessException;
 
-    boolean getUser(String username);
+    boolean getUser(String username) throws DataAccessException;
 
-    void createUser(UserData userData);
+    void createUser(UserData userData) throws DataAccessException;
 
-    UserData getUserData(String username) throws UnauthorizedException;
+    UserData getUserData(String username) throws UnauthorizedException, DataAccessException;
 }
