@@ -27,9 +27,9 @@ public class Server {
         javalin.exception(UnauthorizedException.class, this::unauthorizedExceptionHandler);
 
         javalin.delete("/db", ctx -> {
-            GameService.clear();
             AuthService.clear();
             UserService.clear();
+            GameService.clear();
 
             ctx.status(200);
             ctx.result();

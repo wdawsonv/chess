@@ -20,7 +20,7 @@ public class ListGamesTests {
 
     @Test
     @DisplayName("List Games Positive Test")
-    public void listGamesPositiveTest() throws AlreadyTakenException, BadRequestException {
+    public void listGamesPositiveTest() throws AlreadyTakenException, BadRequestException, DataAccessException {
         Assertions.assertEquals(new ArrayList<>(), GameService.listGames());
     }
 

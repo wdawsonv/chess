@@ -7,13 +7,21 @@ import model.*;
 import java.util.ArrayList;
 
 public class GameService {
-    private static final GameDAO GAME_DAO = new DatabaseGameDAO();
+    private static final GameDAO GAME_DAO;
 
-    public static void clear() {
+    static {
+        try {
+            GAME_DAO = new DatabaseGameDAO();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void clear() throws DataAccessException {
         GAME_DAO.clearGameDB();
     }
 
-    public static CreateGameResult createGame(CreateGameRequest createGameRequest) throws AlreadyTakenException, BadRequestException {
+    public static CreateGameResult createGame(CreateGameRequest createGameRequest) throws AlreadyTakenException, BadRequestException, DataAccessException {
         String gameName = createGameRequest.gameName();
         if (gameName == null) {
             throw new BadRequestException("bad request");
@@ -25,11 +33,11 @@ public class GameService {
         }
     }
 
-    public static ArrayList<GameData> listGames() {
+    public static ArrayList<GameData> listGames() throws DataAccessException {
         return GAME_DAO.listGames();
     }
 
-    public static void joinGame(JoinGameRequest joinGameRequest, String username) throws BadRequestException, AlreadyTakenException {
+    public static void joinGame(JoinGameRequest joinGameRequest, String username) throws BadRequestException, AlreadyTakenException, DataAccessException {
         Integer gameID = joinGameRequest.gameID();
         ChessGame.TeamColor teamColor = joinGameRequest.playerColor();
         GameData gameData = GAME_DAO.getGame(gameID);

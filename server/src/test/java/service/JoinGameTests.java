@@ -22,7 +22,7 @@ public class JoinGameTests {
 
     @Test
     @DisplayName("Join Game Positive Test")
-    public void joinGamesPositiveTest() throws AlreadyTakenException, BadRequestException {
+    public void joinGamesPositiveTest() throws AlreadyTakenException, BadRequestException, DataAccessException {
         GameService.createGame(new CreateGameRequest("gameName"));
         JoinGameRequest joinGameRequest = new JoinGameRequest(ChessGame.TeamColor.WHITE, 1);
 
