@@ -5,7 +5,7 @@ import model.*;
 
 
 public class UserService {
-    private static final UserDAO USER_DAO = new MemoryUserDAO();
+    private static final UserDAO USER_DAO = new DatabaseUserDAO();
 
     public static void clear() {
         USER_DAO.clearUserDB();

@@ -1,13 +1,14 @@
 package service;
 
 import dataaccess.AuthDAO;
+import dataaccess.DatabaseAuthDAO;
 import dataaccess.MemoryAuthDAO;
 import dataaccess.UnauthorizedException;
 import model.*;
 import java.util.UUID;
 
 public class AuthService {
-    private static final AuthDAO AUTH_DAO = new MemoryAuthDAO();
+    private static final AuthDAO AUTH_DAO = new DatabaseAuthDAO();
 
     public static void clear() {
         AUTH_DAO.clearAuthDB();

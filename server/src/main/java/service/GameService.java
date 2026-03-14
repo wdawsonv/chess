@@ -7,7 +7,7 @@ import model.*;
 import java.util.ArrayList;
 
 public class GameService {
-    private static final GameDAO GAME_DAO = new MemoryGameDAO();
+    private static final GameDAO GAME_DAO = new DatabaseGameDAO();
 
     public static void clear() {
         GAME_DAO.clearGameDB();
