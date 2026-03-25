@@ -1,5 +1,6 @@
 package server;
 
+import chess.ChessPiece;
 import com.google.gson.Gson;
 import exception.*;
 import model.*;
@@ -42,6 +43,27 @@ public class ServerFacade {
         } catch (Exception ex) {
             throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
         }
+    }
+
+    private <T> T handleResponse(HttpResponse<String> response, Class<T> responseClass) throws ResponseException {
+        var status = response.statusCode();
+        if (!isSuccessful(status)) {
+            var body = response.body();
+            if (body != null) {
+                throw ResponseException.fromJson(body);
+            }
+            throw new ResponseException(ResponseException.fromHttpStatusCode(status), "other failure: " + status);
+        }
+
+        if (responseClass != null) {
+            return new Gson().fromJson(response.body(), responseClass);
+        }
+
+        return null;
+    }
+
+    private boolean isSuccessful(int status) {
+        return status / 100 == 2;
     }
 
 
